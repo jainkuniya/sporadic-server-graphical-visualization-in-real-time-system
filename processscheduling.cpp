@@ -18,6 +18,10 @@ public :
     void drawTimeLine(float y1) {
         drawLine(50, y1, TOTAL_WIDTH - 50, y1, 5);
     }
+
+    void drawProcessLine(float x1) {
+        drawLine(x1, 330 , x1, 100, 5);
+    }
 };
 
 int main() {
@@ -40,6 +44,7 @@ int main() {
 
         // draw time line
         e.drawTimeLine(y2 + 20);
+        e.drawProcessLine(x1 + 60);
         
         al_flip_display();
         al_rest(0.025);
