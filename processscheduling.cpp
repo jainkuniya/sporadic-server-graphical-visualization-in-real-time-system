@@ -120,6 +120,10 @@ int main() {
         al_flip_display();
         al_rest(0.025);
     }
+
+    al_destroy_thread(thread_1);
+    al_destroy_thread(thread_2);
+
     al_destroy_display(display);
     return 0;
 }
