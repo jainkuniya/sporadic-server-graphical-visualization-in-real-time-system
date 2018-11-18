@@ -6,6 +6,9 @@
 
 #define PI M_PI
 
+#define TOTAL_WIDTH 750
+#define TOTAL_HEIGHT 500
+
 class engine {
 public :
     void drawLine(int x1,int y1, int x2, int y2, int t) {
@@ -13,7 +16,7 @@ public :
     }
 
     void drawTimeLine(float y1) {
-        drawLine(0, y1, 700, y1, 5);
+        drawLine(50, y1, TOTAL_WIDTH - 50, y1, 5);
     }
 };
 
@@ -24,7 +27,7 @@ int main() {
     al_init();
     al_init_primitives_addon();
 
-    display = al_create_display(750, 500);
+    display = al_create_display(TOTAL_WIDTH, TOTAL_HEIGHT);
     al_clear_to_color(al_map_rgb(255, 255, 255));
     if(!display) return -1;
 
