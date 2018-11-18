@@ -1,4 +1,4 @@
-// g++ -Wall -lm engine.cpp -o engine `pkg-config --cflags --libs allegro-5.0 allegro_primitives-5.0`
+// g++ processscheduling.cpp -lallegro_primitives -lallegro
 
 #include "allegro5/allegro.h"
 #include <allegro5/allegro_primitives.h>
