@@ -96,6 +96,10 @@ public :
         al_draw_line(50, y1, TOTAL_WIDTH - 50, y1, al_map_rgb(0, 255, 0), 2);
     }
 
+    void drawServerStatusLine(float y1){
+        al_draw_line(50, y1, TOTAL_WIDTH - 50, y1, al_map_rgb(132, 111, 60), 2);
+    }
+
     void drawProcessLine(float x1) {
         drawLine(x1, TOTAL_HEIGHT - 20 , x1, 100, 5);
     }
@@ -176,6 +180,9 @@ int main() {
 
         // draw aperopic task line
         e.drawAperiodicTaskTimeLine(y2 + 20 - (TOTAL_HEIGHT/2.5));
+
+        // draw server status (active/idle) line
+        e.drawServerStatusLine(y2 + 20 - (TOTAL_HEIGHT/4.5));
 
         // draw aperopic task line
         e.drawServerCapacityTimeLine(y2 + 20 - 3);
