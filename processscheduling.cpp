@@ -291,6 +291,7 @@ int main() {
 
         // draw server capacity label
         for(int j=0; j<5; j++){
+            // cout << CONTENT_END_Y+20 - (j)*serverCapacityLabelDis << "\n";
             e.drawServerLabelLine(CONTENT_END_Y+20 - (j)*serverCapacityLabelDis);
         }
 
@@ -336,9 +337,9 @@ static void *ServerCapacityFunc(ALLEGRO_THREAD *thr, void *arg){
 
         al_lock_mutex(data->mutex);
         data->serverCapacityCor.push_back(
-            ServerCapacityCordinate(CONTENT_START_X+i, CONTENT_END_Y + 20 - (data->currentCapacity -1) * serverCapacityLabelDis));
+            ServerCapacityCordinate(CONTENT_START_X+i, CONTENT_END_Y + 20 - (float)(data->currentCapacity-1) * serverCapacityLabelDis));
         al_unlock_mutex(data->mutex);
-
+        // cout << CONTENT_END_Y + 20 - (data->currentCapacity-1) * serverCapacityLabelDis << "\n";
         al_rest(WAIT_FACTOR);
     }
 
@@ -370,7 +371,7 @@ static void *SchedularFunc(ALLEGRO_THREAD *thr, void *arg){
 
         // check if priority changed
         if(newPrio != data->currentExc) {
-            cout << "Giving priority to: " << newPrio << "\n";
+            // cout << "Giving priority to: " << newPrio << "\n";
             al_lock_mutex(data->mutex);
             data->currentExc = newPrio;
             al_unlock_mutex(data->mutex); 
