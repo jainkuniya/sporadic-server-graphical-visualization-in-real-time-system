@@ -1,4 +1,18 @@
 // g++ processscheduling.cpp -lallegro_primitives -lallegro -lpthread -lallegro_font -lallegro_ttf
+// ./a.out
+
+// This code is written from scratch, complete commit history can be observer at
+// https://github.com/jainkuniya/sporadic-server-graphical-visualization-in-real-time-system/commits
+
+// youtube video: https://www.youtube.com/watch?v=Uk_JrIUiWAw
+
+// read Readme.md for more details
+
+// Q: Simulate and graphically visualize sporadic server scheduling 
+// algorithm for the given task set. 
+// P|C,T| = |1,5|, |4,15|; Cs=5, Ts=10; 
+// Read more about Sporadic Server at http://bit.ly/2R6L7eN (page 160)
+
 #include <stdio.h>
 #include "allegro5/allegro.h"
 #include <allegro5/allegro_primitives.h>
