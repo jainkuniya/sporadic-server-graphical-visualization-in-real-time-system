@@ -27,7 +27,7 @@
 
 using namespace std;
 
-static void *Func_Thread(ALLEGRO_THREAD *thr, void *arg);
+static void *PeriodicTaskFunc(ALLEGRO_THREAD *thr, void *arg);
 static void *CurrentTimeFunc(ALLEGRO_THREAD *thr, void *arg);
 static void *ServerCapacityFunc(ALLEGRO_THREAD *thr, void *arg);
 
@@ -177,8 +177,8 @@ int main() {
     AperiodicTask aperiodicTask2 = AperiodicTask(2, 8);
     data.aperiodicTask.push_back(aperiodicTask1);
     data.aperiodicTask.push_back(aperiodicTask2);
-    thread_1 = al_create_thread(Func_Thread, &data);
-    thread_2 = al_create_thread(Func_Thread, &data);
+    thread_1 = al_create_thread(PeriodicTaskFunc, &data);
+    thread_2 = al_create_thread(PeriodicTaskFunc, &data);
     thread_3 = al_create_thread(CurrentTimeFunc, &data);
     thread_4 = al_create_thread(ServerCapacityFunc, &data);
     al_start_thread(thread_1);
@@ -276,7 +276,7 @@ static void *ServerCapacityFunc(ALLEGRO_THREAD *thr, void *arg){
 }
 
 
-static void *Func_Thread(ALLEGRO_THREAD *thr, void *arg){
+static void *PeriodicTaskFunc(ALLEGRO_THREAD *thr, void *arg){
 
     DATA *data  = (DATA*) arg;
     float num   = 0.1;
