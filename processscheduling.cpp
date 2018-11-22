@@ -390,7 +390,7 @@ static void *SchedularFunc(ALLEGRO_THREAD *thr, void *arg){
         for(std::vector<int>::size_type taskCount = 0; 
                 taskCount != data->threads.size(); 
                 taskCount++) {
-
+                    // cout << "Schedular: "<< newPrio << " " << data->threads[taskCount].name << " " << data->threads[taskCount].pr << " " << data->threads[taskCount].wantCPU << "\n";
                     if(data->threads[taskCount].pr < newPrio && data->threads[taskCount].wantCPU) {
                         newPrio = data->threads[taskCount].pr;
                     }
@@ -399,15 +399,15 @@ static void *SchedularFunc(ALLEGRO_THREAD *thr, void *arg){
         if(data->ps < newPrio && data->serverWantCPU){
             newPrio = data->ps;
         }
-
+        // cout << newPrio << "\n";
         // check if priority changed
         if(newPrio != data->currentExc) {
-            cout << "Giving priority to: " << newPrio << "\n";
+            // cout << "Giving priority to: " << newPrio << "\n";
             
             data->currentExc = newPrio;
         }
         al_unlock_mutex(data->mutex);
-        // al_rest(WAIT_FACTOR);
+        al_rest(WAIT_FACTOR);
     }
 
     return NULL;
@@ -447,7 +447,7 @@ static void *AperiodicTaskFunc(ALLEGRO_THREAD *thr, void *arg){
             }
         }
         
-        
+        int temp = 0;
         for(std::vector<int>::size_type taskCount = 0; 
             taskCount != data->aperiodicTask.size(); 
             taskCount++) {
@@ -459,7 +459,7 @@ static void *AperiodicTaskFunc(ALLEGRO_THREAD *thr, void *arg){
                 // if task not completed excecute it
                 if(data->aperiodicTask[taskCount].c > data->aperiodicTask[taskCount].completed 
                     && currentTime >= data->aperiodicTask[taskCount].a){
-
+                        temp++;
                         if(data->currentExc == data->ps) {
                             // exec task
                             data->aperiodicTask[taskCount].completed +=  WAIT_FACTOR;
@@ -467,18 +467,16 @@ static void *AperiodicTaskFunc(ALLEGRO_THREAD *thr, void *arg){
                             // cout << "Pushing " << i << "\n";
                         }else {
                             // request for exc if already not requested
-                            if(!data->serverWantCPU) {
-                                // cout << "Aperiodic task: Requesting CPU.\n";
-                                data->serverWantCPU = true;
-                            }
-                        }
-                }else {
-                        // do not need CPU
-                        if(data->serverWantCPU) {
-                            // cout << "Aperiodic task: Returing CPU." << "\n";
-                            data->serverWantCPU = false;
+                            // cout << "Aperiodic task: Requesting CPU.\n";
+                            data->serverWantCPU = true;
                         }
                 }
+        }
+
+        // do not need CPU
+        if(temp == 0 && data->serverWantCPU) {
+            // cout << "Aperiodic task: Returing CPU." << "\n";
+            data->serverWantCPU = false;
         }
         al_unlock_mutex(data->mutex); 
         // cout << i << "\n";
@@ -541,6 +539,7 @@ static void *PeriodicTaskFunc(ALLEGRO_THREAD *thr, void *arg){
             }  
         }
         
+        int temp=0;
         for(std::vector<int>::size_type instanceCount = 0; 
             instanceCount != data->threads[taskIndex].tasks.size(); 
             instanceCount++) {
@@ -552,7 +551,7 @@ static void *PeriodicTaskFunc(ALLEGRO_THREAD *thr, void *arg){
                 // if task not completed excecute it
                 if(data->threads[taskIndex].tasks[instanceCount].c > data->threads[taskIndex].tasks[instanceCount].completed 
                     && currentTime >= data->threads[taskIndex].tasks[instanceCount].a){
-
+                        temp++;
                         if(data->currentExc == data->threads[taskIndex].pr) {
                             // exec task
                             data->threads[taskIndex].tasks[instanceCount].completed +=  WAIT_FACTOR;
@@ -560,19 +559,14 @@ static void *PeriodicTaskFunc(ALLEGRO_THREAD *thr, void *arg){
                             // cout << "Pushing " << i << "\n";
                         }else {
                             // request for exc if already not requested
-                            if(!data->threads[taskIndex].wantCPU) {
-                                // cout << "Aperiodic task: Requesting CPU.\n";
-                                data->threads[taskIndex].wantCPU = true;
-                            }
+                            // cout << "Aperiodic task: Requesting CPU.\n";
+                            data->threads[taskIndex].wantCPU = true;
                         }
                 }
-                else {
-                        // do not need CPU
-                        if(data->threads[taskIndex].wantCPU) {
-                            // cout << "Aperiodic task: Returing CPU." << "\n";
-                            data->threads[taskIndex].wantCPU = false;
-                        }
-                }
+        }
+        if(temp == 0) {
+            // cout << threadData.name << ": Returing CPU." << "\n";
+            data->threads[taskIndex].wantCPU = false;
         }
         al_unlock_mutex(data->mutex);
         al_rest(WAIT_FACTOR);
