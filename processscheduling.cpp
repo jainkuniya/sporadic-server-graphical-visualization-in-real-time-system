@@ -164,8 +164,8 @@ public :
         al_draw_line(cor.x-1, cor.y-1, cor.x+1, cor.y+1, al_map_rgb(0, 0, 0), 1);
     }
 
-    void drawExcetuting(float x, float y) {
-        al_draw_line(x-1, y, x+1, y-30, al_map_rgb(0, 0, 0), 1);
+    void drawExcetuting(float x, float y, float height) {
+        al_draw_line(x-1, y, x+1, y-height, al_map_rgb(0, 0, 0), 1);
     }
 
     void drawTimeLine(float y11, float thickness) {
@@ -267,6 +267,8 @@ int main() {
             // printf("%.6f %.6f %.6f\n", xCor, yCor, (float)((int)1130/(int)25));
             e.drawTimeLabelLine(xCor, yCor);
         }
+        
+        int serverStatusLineY = CONTENT_END_Y + 20 - (TOTAL_HEIGHT/4);
 
         al_lock_mutex(data.mutex);
         // draw each process line
@@ -289,7 +291,11 @@ int main() {
                     for(std::vector<int>::size_type point = 0; 
                         point != data.threads[processCount].tasks[taskCount].excecuting.size(); 
                         point++) {
-                            e.drawExcetuting(data.threads[processCount].tasks[taskCount].excecuting[point], yCor);
+                            e.drawExcetuting(data.threads[processCount].tasks[taskCount].excecuting[point], yCor, 30);
+                            // draw server status if this task priority is higher than server
+                            if(data.threads[processCount].pr < data.ps) {
+                                e.drawExcetuting(data.threads[processCount].tasks[taskCount].excecuting[point], serverStatusLineY, 15);
+                            }
                     }
             }
         }
@@ -310,12 +316,13 @@ int main() {
                 for(std::vector<int>::size_type lintCount = 0; 
                     lintCount != data.aperiodicTask[tasks].excecuting.size(); 
                     lintCount++) {
-                        e.drawExcetuting(data.aperiodicTask[tasks].excecuting[lintCount], yCorServerLine);
+                        e.drawExcetuting(data.aperiodicTask[tasks].excecuting[lintCount], yCorServerLine, 30);
+                        e.drawExcetuting(data.aperiodicTask[tasks].excecuting[lintCount], serverStatusLineY, 15);
                     }
         }
 
         // draw server status (active/idle) line
-        e.drawServerStatusLine(CONTENT_END_Y + 20 - (TOTAL_HEIGHT/4));
+        e.drawServerStatusLine(serverStatusLineY);
 
         // draw aperopic task line
         e.drawServerCapacityTimeLine(CONTENT_END_Y + 20 - 3);
