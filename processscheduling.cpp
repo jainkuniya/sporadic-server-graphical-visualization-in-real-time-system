@@ -388,18 +388,25 @@ static void *AperiodicTaskFunc(ALLEGRO_THREAD *thr, void *arg){
 
                     // mark want CPU true
                     data->serverWantCPU = true;
-                    al_unlock_mutex(data->mutex);
-                    
-
-                   
-
+                    al_unlock_mutex(data->mutex);    
                 }
             }
         }
 
-        // al_lock_mutex(data->mutex);
-        // printf("%.6f\n", i*WAIT_FACTOR);
-        // al_unlock_mutex(data->mutex);
+        if(data->currentExc == data->ps) {
+            for(std::vector<int>::size_type taskCount = 0; 
+                taskCount != data->aperiodicTask.size(); 
+                taskCount++) {
+
+                    // if task not completed excecute it
+                    if(data->aperiodicTask[taskCount].c < data->aperiodicTask[taskCount].completed 
+                        && currentTime > data->aperiodicTask[taskCount].a){
+                        al_lock_mutex(data->mutex);
+                        data->aperiodicTask[taskCount].completed +=  WAIT_FACTOR;
+                        al_unlock_mutex(data->mutex);
+                    }
+            }
+        }
 
         al_rest(WAIT_FACTOR);
         doneWithSec = currentTime;
