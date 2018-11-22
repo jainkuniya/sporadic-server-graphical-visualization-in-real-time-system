@@ -11,6 +11,11 @@
 #define TOTAL_HEIGHT 750
 #define TOTAL_TASKS 2
 
+#define TOTAL_TIME 30
+#define MAX_TIME 25
+#define WAIT_FACTOR 0.025
+#define LOOP_TILL TOTAL_TIME/WAIT_FACTOR
+
 using namespace std;
 
 static void *Func_Thread(ALLEGRO_THREAD *thr, void *arg);
@@ -141,21 +146,25 @@ int main() {
     al_start_thread(thread_2);
 
     engine e;
-    float x1 = 0,y1 = 220, x2 = 125, y2 = TOTAL_HEIGHT - 50;
+    float x1 = 60,y1 = 220, x2 = TOTAL_WIDTH-50, y2 = TOTAL_HEIGHT - 50;
     float separationDis = 100;
+    float totalTimeLine = x2-x1;
+
+    // // wait before eyes are setup
+    // al_clear_to_color(al_map_rgb(255, 255, 255));
+    // al_rest(3);
      
-    for(float i = 0; i + 120 < 1700; i += 2) {
+    for(float i = 0; i < LOOP_TILL; i += 1) {
         al_clear_to_color(al_map_rgb(255, 255, 255));
 
         // draw time line
         e.drawTimeLine(y2 + 20, 5);
-        e.drawProcessLine(x1 + 60);
+        e.drawProcessLine(x1);
 
         // draw time label
         // 1 block 1 second
-        float tempX = x1 + 60;
-        for(int j=0; j<25; j++){
-            e.drawTimeLabelLine(tempX + j*40, y2 + 20);
+        for(int j=0; j<MAX_TIME; j++){
+            e.drawTimeLabelLine(x1 + j*(totalTimeLine/MAX_TIME), y2 + 20);
         }
 
         // draw each process line
@@ -181,7 +190,7 @@ int main() {
         e.drawCurrentTimeLine(x1 + 60 + i);
         
         al_flip_display();
-        al_rest(0.025);
+        al_rest(WAIT_FACTOR);
     }
 
     al_destroy_thread(thread_1);
@@ -205,15 +214,17 @@ static void *Func_Thread(ALLEGRO_THREAD *thr, void *arg){
 
     al_unlock_mutex(data->mutex);
 
-    while(!al_get_thread_should_stop(thr)){
 
-      al_lock_mutex(data->mutex);
+
+//     while(!al_get_thread_should_stop(thr)){
+
+//       al_lock_mutex(data->mutex);
       
-      al_unlock_mutex(data->mutex);
+//       al_unlock_mutex(data->mutex);
 
-      al_rest(0.01);
+//       al_rest(0.01);
 
-   }
+//    }
 
    return NULL;
    }
