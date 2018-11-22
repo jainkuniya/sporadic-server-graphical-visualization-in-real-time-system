@@ -37,10 +37,10 @@ static void *SchedularFunc(ALLEGRO_THREAD *thr, void *arg);
 
 class Task {
     public:
-        int c;
-        int a;
-        int d;
-        int completed = 0;
+        float c;
+        float a;
+        float d;
+        float completed = 0;
     public:
         Task(int com, int arr, int dead){
             c=com;
@@ -51,10 +51,10 @@ class Task {
 
 class PeriodicTask {
     public:
-        int c;
-        int t;
-        int a;
-        int d;
+        float c;
+        float t;
+        float a;
+        float d;
         bool isAquired;
         int pr;
         vector <Task> tasks;
@@ -75,9 +75,9 @@ class PeriodicTask {
 
 class AperiodicTask {
     public:
-        int c;
-        int a;
-        int completed = 0;
+        float c;
+        float a;
+        float completed = 0;
     public:
         AperiodicTask(int com, int arrival) {
             c =com;
@@ -148,7 +148,7 @@ public :
     }
 
     void drawSererGraphPoint(ServerCapacityCordinate cor){
-        al_draw_line(cor.x-2, cor.y-2, cor.x+2, cor.y+2, al_map_rgb(0, 0, 0), 2);
+        al_draw_line(cor.x-1, cor.y-1, cor.x+1, cor.y+1, al_map_rgb(0, 0, 0), 1);
     }
 
     void drawTimeLine(float y11, float thickness) {
@@ -416,22 +416,47 @@ static void *AperiodicTaskFunc(ALLEGRO_THREAD *thr, void *arg){
                 }
             }
         }
+        
+        
+        bool doneSomeWork = false;
+        for(std::vector<int>::size_type taskCount = 0; 
+            taskCount != data->aperiodicTask.size(); 
+            taskCount++) {
+                if(currentTime < data->aperiodicTask[taskCount].a){
+                    // do not consider future instances
+                    continue;
+                }
+                // cout << data->aperiodicTask[taskCount].completed << " " << data->aperiodicTask[taskCount].a << "\n";
+                // if task not completed excecute it
+                if(data->aperiodicTask[taskCount].c > data->aperiodicTask[taskCount].completed 
+                    && currentTime >= data->aperiodicTask[taskCount].a){
 
-        if(data->currentExc == data->ps) {
-            for(std::vector<int>::size_type taskCount = 0; 
-                taskCount != data->aperiodicTask.size(); 
-                taskCount++) {
-
-                    // if task not completed excecute it
-                    if(data->aperiodicTask[taskCount].c < data->aperiodicTask[taskCount].completed 
-                        && currentTime > data->aperiodicTask[taskCount].a){
-                        al_lock_mutex(data->mutex);
-                        data->aperiodicTask[taskCount].completed +=  WAIT_FACTOR;
-                        al_unlock_mutex(data->mutex);
-                    }
-            }
+                        if(data->currentExc == data->ps) {
+                            // exec task
+                            al_lock_mutex(data->mutex);
+                            data->aperiodicTask[taskCount].completed +=  WAIT_FACTOR;
+                            al_unlock_mutex(data->mutex);
+                            doneSomeWork = true;
+                        }else {
+                            // request for exc if already not requested
+                            if(!data->serverWantCPU) {
+                                // cout << "Aperiodic task: Requesting CPU.\n";
+                                al_lock_mutex(data->mutex);
+                                data->serverWantCPU = true;
+                                al_unlock_mutex(data->mutex);
+                            }
+                        }
+                }else {
+                        // do not need CPU
+                        if(data->serverWantCPU) {
+                            // cout << "Aperiodic task: Returing CPU." << "\n";
+                            al_lock_mutex(data->mutex);
+                            data->serverWantCPU = false;
+                            al_unlock_mutex(data->mutex);
+                        }
+                }
         }
-
+        // cout << i << "\n";
         al_rest(WAIT_FACTOR);
         doneWithSec = currentTime;
     }
@@ -476,7 +501,7 @@ static void *PeriodicTaskFunc(ALLEGRO_THREAD *thr, void *arg){
         int currentTime = i*WAIT_FACTOR;
 
         if(doneWithSec != currentTime) {
-            if(currentTime % threadData.t == threadData.a){
+            if(currentTime % (int)threadData.t == threadData.a){
                 // new instace arrived
                 // push to queue
                 al_lock_mutex(data->mutex);
