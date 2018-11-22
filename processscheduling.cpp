@@ -130,7 +130,7 @@ int main() {
 
     engine e;
     float x1 = 0,y1 = 220, x2 = 125, y2 = TOTAL_HEIGHT - 50;
-    float separationDis = 50;
+    float separationDis = 100;
      
     for(float i = 0; i + 120 < 1700; i += 2) {
         al_clear_to_color(al_map_rgb(255, 255, 255));
@@ -150,7 +150,7 @@ int main() {
         for(std::vector<int>::size_type processCount = 0; 
             processCount != data.threads.size(); 
             processCount++) {
-                e.drawTimeLine(y2 + 20 - (processCount + 1 )*separationDis, 3);
+                e.drawTimeLine(y2 + 20 - (TOTAL_HEIGHT/2.5) - (processCount + 1 )*separationDis, 3);
         }
 
         // move current time line
