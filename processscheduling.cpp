@@ -41,6 +41,7 @@ class Task {
         float a;
         float d;
         float completed = 0;
+        vector <int> excecuting;
     public:
         Task(int com, int arr, int dead){
             c=com;
@@ -268,7 +269,17 @@ int main() {
                 lineCount != data.threads[processCount].verLines.size(); 
                 lineCount++) {
                     e.drawVerLines(data.threads[processCount].verLines[lineCount], yCor);
-                }
+            }
+            // draw executing
+            for(std::vector<int>::size_type taskCount = 0; 
+                taskCount != data.threads[processCount].tasks.size(); 
+                taskCount++) {
+                    for(std::vector<int>::size_type point = 0; 
+                        point != data.threads[processCount].tasks[taskCount].excecuting.size(); 
+                        point++) {
+                            e.drawExcetuting(data.threads[processCount].tasks[taskCount].excecuting[point], yCor);
+                    }
+            }
         }
 
         // draw aperopic task line
@@ -524,14 +535,52 @@ static void *PeriodicTaskFunc(ALLEGRO_THREAD *thr, void *arg){
                     .push_back(Task(threadData.c, currentTime, threadData.d + currentTime));
                 data->threads[taskIndex].verLines
                     .push_back(CONTENT_START_X + i);
+                data->threads[taskIndex].wantCPU = true;
                 al_unlock_mutex(data->mutex);
-
                 cout << threadData.name << ": new instance arrived c:" << threadData.c << ", arrived at:" << currentTime << ", absolute deadline:" << threadData.d + currentTime << "\n"; 
 
             }  
         }
         
-        // al_unlock_mutex(data->mutex);
+        for(std::vector<int>::size_type instanceCount = 0; 
+            instanceCount != data->threads[taskIndex].tasks.size(); 
+            instanceCount++) {
+                if(currentTime < data->threads[taskIndex].tasks[instanceCount].a){
+                    // do not consider future instances
+                    continue;
+                }
+
+                // if task not completed excecute it
+                if(data->threads[taskIndex].tasks[instanceCount].c > data->threads[taskIndex].tasks[instanceCount].completed 
+                    && currentTime >= data->threads[taskIndex].tasks[instanceCount].a){
+
+                        if(data->currentExc == data->threads[taskIndex].pr) {
+                            // exec task
+                            al_lock_mutex(data->mutex);
+                            data->threads[taskIndex].tasks[instanceCount].completed +=  WAIT_FACTOR;
+                            data->threads[taskIndex].tasks[instanceCount].excecuting.push_back(CONTENT_START_X + i);
+                            // cout << "Pushing " << i << "\n";
+                            al_unlock_mutex(data->mutex);
+                        }else {
+                            // request for exc if already not requested
+                            if(!data->threads[taskIndex].wantCPU) {
+                                // cout << "Aperiodic task: Requesting CPU.\n";
+                                al_lock_mutex(data->mutex);
+                                data->threads[taskIndex].wantCPU = true;
+                                al_unlock_mutex(data->mutex);
+                            }
+                        }
+                }
+                else {
+                        // do not need CPU
+                        if(data->threads[taskIndex].wantCPU) {
+                            // cout << "Aperiodic task: Returing CPU." << "\n";
+                            al_lock_mutex(data->mutex);
+                            data->threads[taskIndex].wantCPU = false;
+                            al_unlock_mutex(data->mutex);
+                        }
+                }
+        }
 
         al_rest(WAIT_FACTOR);
         doneWithSec = currentTime; 
