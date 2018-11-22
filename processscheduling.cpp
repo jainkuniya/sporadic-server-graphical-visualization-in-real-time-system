@@ -83,6 +83,10 @@ public :
         drawLine(50, y1, TOTAL_WIDTH - 50, y1, thickness);
     }
 
+    void drawAperiodicTaskTimeLine(float y1){
+        al_draw_line(50, y1, TOTAL_WIDTH - 50, y1, al_map_rgb(0, 0, 255), 3);
+    }
+
     void drawProcessLine(float x1) {
         drawLine(x1, TOTAL_HEIGHT - 20 , x1, 100, 5);
     }
@@ -152,6 +156,9 @@ int main() {
             processCount++) {
                 e.drawTimeLine(y2 + 20 - (TOTAL_HEIGHT/2.5) - (processCount + 1 )*separationDis, 3);
         }
+
+        // draw aperopic task line
+        e.drawAperiodicTaskTimeLine(y2 + 20 - (TOTAL_HEIGHT/2.5));
 
         // move current time line
         e.drawCurrentTimeLine(x1 + 60 + i);
