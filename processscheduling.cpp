@@ -60,6 +60,7 @@ class PeriodicTask {
         vector <Task> tasks;
         string name;
         vector <int> verLines;
+        bool wantCPU = false;
     public:
         PeriodicTask() {}
         PeriodicTask(string na, int com, int ti, int arrival, int deadline, int priority) {
@@ -110,6 +111,7 @@ class DATA{
       float          cs;
       float          ts;
       int            ps; // priority of server
+      bool           serverWantCPU = false;
       float          currentCapacity;
       float          currentTime = CONTENT_START_X;
       int            currentExc;
