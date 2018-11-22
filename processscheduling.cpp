@@ -39,13 +39,15 @@ class PeriodicTask {
         int a;
         int d;
         bool isAquired;
+        int pr;
     public:
         PeriodicTask() {}
-        PeriodicTask(int com, int ti, int arrival, int deadline) {
+        PeriodicTask(int com, int ti, int arrival, int deadline, int priority) {
             c =com;
             t= ti;
             a=arrival;
             d=deadline;
+            pr=priority;
         }
 };
 
@@ -86,8 +88,10 @@ class DATA{
       vector <ServerCapacityCordinate> serverCapacityCor;
       float          cs;
       float          ts;
+      int            ps; // priority of server
       float          currentCapacity;
       float          currentTime = CONTENT_START_X;
+      int            currentExc;
 
    DATA() : mutex(al_create_mutex()),
             cond(al_create_cond()),
@@ -169,13 +173,15 @@ int main() {
     ALLEGRO_THREAD      *thread_5    = NULL; // thread for apperiodic tasks
 
     DATA data;
-    PeriodicTask threadData1 = PeriodicTask(1, 5, 0, 10);
-    PeriodicTask threadData2 = PeriodicTask(2, 10, 0, 20);
+    PeriodicTask threadData1 = PeriodicTask(1, 5, 0, 10, 1);
+    PeriodicTask threadData2 = PeriodicTask(2, 10, 0, 20, 3);
     data.threads.push_back(threadData1);
     data.threads.push_back(threadData2);
     data.cs = 5;
     data.ts = 10;
+    data.ps = 2;
     data.currentCapacity = 5;
+    data.currentExc = 0;
     AperiodicTask aperiodicTask1 = AperiodicTask(2, 4);
     AperiodicTask aperiodicTask2 = AperiodicTask(2, 8);
     data.aperiodicTask.push_back(aperiodicTask1);
