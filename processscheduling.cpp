@@ -385,10 +385,13 @@ static void *AperiodicTaskFunc(ALLEGRO_THREAD *thr, void *arg){
                     al_lock_mutex(data->mutex);
                     data->sVerLines
                         .push_back(CONTENT_START_X + i);
+
+                    // mark want CPU true
+                    data->serverWantCPU = true;
                     al_unlock_mutex(data->mutex);
                     
 
-                    // mark want CPU true
+                   
 
                 }
             }
