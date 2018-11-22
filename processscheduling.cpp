@@ -151,7 +151,7 @@ class DATA{
 class engine {
 public :
     void drawLine(int x11,int y11, int x22, int y22, int thickness) {
-        al_draw_line(x11, y11, x22, y22, al_map_rgb(0, 0, 0), thickness);
+        al_draw_line(min(x11, CONTENT_END_X), y11, min(x22, CONTENT_END_X), y22, al_map_rgb(0, 0, 0), thickness);
     }
 
     void drawVerLines(float x, float y){
@@ -161,7 +161,7 @@ public :
     }
 
     void drawSererGraphPoint(ServerCapacityCordinate cor){
-        al_draw_line(cor.x-1, cor.y-1, cor.x+1, cor.y+1, al_map_rgb(0, 0, 0), 1);
+        al_draw_line(min((int)cor.x-1,CONTENT_END_X), cor.y-1, min((int)cor.x+1, CONTENT_END_X), cor.y+1, al_map_rgb(0, 0, 0), 1);
     }
 
     void drawExcetuting(float x, float y, float height) {
@@ -189,7 +189,7 @@ public :
     }
 
     void drawCurrentTimeLine(float x){
-        al_draw_line(x, TOTAL_HEIGHT - 20, x, 100, al_map_rgb(255, 0, 0), 3);
+        al_draw_line(min((int)x,CONTENT_END_X), TOTAL_HEIGHT - 20, min((int)x, CONTENT_END_X), 100, al_map_rgb(255, 0, 0), 3);
     }
 
     void drawTimeLabelLine(float x, float y){
