@@ -73,6 +73,10 @@ public :
         drawLine(x1, 330 , x1, 100, 5);
     }
 
+    void drawCurrentTimeLine(float x1){
+        al_draw_line(x1, 330, x1, 100, al_map_rgb(255, 0, 0), 3);
+    }
+
     void drawTimeLabelLine(float x1, float y){
         drawLine(x1, y-10 , x1, y+10, 2);
     }
@@ -108,7 +112,7 @@ int main() {
     float x1 = 0,y1 = 220, x2 = 125, y2 = 300;
     float separationDis = 50;
      
-    for(float i = 0; i + 120 < 700; i += 2) {
+    for(float i = 0; i + 120 < 1700; i += 2) {
         al_clear_to_color(al_map_rgb(255, 255, 255));
 
         // draw time line
@@ -128,6 +132,9 @@ int main() {
             processCount++) {
                 e.drawTimeLine(y2 + 20 - (processCount + 1 )*separationDis, 3);
         }
+
+        // move current time line
+        e.drawCurrentTimeLine(x1 + 60 + i);
         
         al_flip_display();
         al_rest(0.025);
