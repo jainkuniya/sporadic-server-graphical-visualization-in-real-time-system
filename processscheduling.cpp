@@ -282,6 +282,12 @@ static void *ServerCapacityFunc(ALLEGRO_THREAD *thr, void *arg){
             al_rest(INITAL_WAIT);
         }
 
+        if(data->currentExc == data->ps) {
+            al_lock_mutex(data->mutex);
+            data->currentCapacity = data->currentCapacity - WAIT_FACTOR;
+            al_unlock_mutex(data->mutex);
+        }
+
         al_lock_mutex(data->mutex);
         data->serverCapacityCor.push_back(
             ServerCapacityCordinate(CONTENT_START_X+i, CONTENT_END_Y + 20 - (data->currentCapacity -1) * serverCapacityLabelDis));
