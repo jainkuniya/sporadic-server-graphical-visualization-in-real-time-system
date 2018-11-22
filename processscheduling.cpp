@@ -31,6 +31,7 @@ static void *PeriodicTaskFunc(ALLEGRO_THREAD *thr, void *arg);
 static void *CurrentTimeFunc(ALLEGRO_THREAD *thr, void *arg);
 static void *ServerCapacityFunc(ALLEGRO_THREAD *thr, void *arg);
 static void *AperiodicTaskFunc(ALLEGRO_THREAD *thr, void *arg);
+static void *SchedularFunc(ALLEGRO_THREAD *thr, void *arg);
 
 class PeriodicTask {
     public:
@@ -166,11 +167,12 @@ int main() {
 
     al_clear_to_color(al_map_rgb(255, 255, 255));
 
-    ALLEGRO_THREAD      *thread_1    = NULL;
-    ALLEGRO_THREAD      *thread_2    = NULL;
+    ALLEGRO_THREAD      *thread_1    = NULL; // thread for periodic task 1
+    ALLEGRO_THREAD      *thread_2    = NULL; // thread for periodic task 2
     ALLEGRO_THREAD      *thread_3    = NULL; // thread to show current time, red line
     ALLEGRO_THREAD      *thread_4    = NULL; // thread to cal server capacity, graph
     ALLEGRO_THREAD      *thread_5    = NULL; // thread for apperiodic tasks
+    ALLEGRO_THREAD      *therad_6    = NULL; // thread to schedule
 
     DATA data;
     PeriodicTask threadData1 = PeriodicTask(1, 5, 0, 10, 1);
@@ -191,11 +193,13 @@ int main() {
     thread_3 = al_create_thread(CurrentTimeFunc, &data);
     thread_4 = al_create_thread(ServerCapacityFunc, &data);
     thread_5 = al_create_thread(AperiodicTaskFunc, &data);
+    therad_6 = al_create_thread(SchedularFunc, &data);
     al_start_thread(thread_1);
     al_start_thread(thread_2);
     al_start_thread(thread_3);
     al_start_thread(thread_4);
     al_start_thread(thread_5);
+    al_start_thread(therad_6);
 
     engine e;
      
@@ -262,6 +266,7 @@ int main() {
     al_destroy_thread(thread_3);
     al_destroy_thread(thread_4);
     al_destroy_thread(thread_5);
+    al_destroy_thread(therad_6);
 
     al_destroy_display(display);
     return 0;
@@ -286,6 +291,13 @@ static void *ServerCapacityFunc(ALLEGRO_THREAD *thr, void *arg){
     }
 
    return NULL;
+}
+
+static void *SchedularFunc(ALLEGRO_THREAD *thr, void *arg){
+
+    DATA *data  = (DATA*) arg;
+
+    return NULL;
 }
 
 static void *AperiodicTaskFunc(ALLEGRO_THREAD *thr, void *arg){
