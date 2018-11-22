@@ -31,6 +31,17 @@ class PeriodicTask {
         }
 };
 
+class AperiodicTask {
+    public:
+        int c;
+        int a;
+    public:
+        AperiodicTask(int com, int arrival) {
+            c =com;
+            a=arrival;
+        }
+};
+
 class DATA{
 
    public:
@@ -42,6 +53,7 @@ class DATA{
       bool           modi_X;
       bool           ready;
       vector <PeriodicTask> threads;
+      vector <AperiodicTask> aperiodicTask;
       float          cs;
       float          ts;
 
@@ -107,6 +119,10 @@ int main() {
     data.threads.push_back(threadData2);
     data.cs = 5;
     data.ts = 10;
+    AperiodicTask aperiodicTask1 = AperiodicTask(2, 4);
+    AperiodicTask aperiodicTask2 = AperiodicTask(2, 8);
+    data.aperiodicTask.push_back(aperiodicTask1);
+    data.aperiodicTask.push_back(aperiodicTask2);
     thread_1 = al_create_thread(Func_Thread, &data);
     thread_2 = al_create_thread(Func_Thread, &data);
     al_start_thread(thread_1);
