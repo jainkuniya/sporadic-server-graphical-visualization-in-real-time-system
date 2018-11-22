@@ -11,8 +11,8 @@
 
 #define PI M_PI
 
-#define TOTAL_WIDTH 1240
-#define TOTAL_HEIGHT 750
+#define TOTAL_WIDTH 1200
+#define TOTAL_HEIGHT 700
 #define TOTAL_TASKS 2
 
 #define TOTAL_TIME 30
