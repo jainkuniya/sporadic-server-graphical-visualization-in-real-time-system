@@ -154,7 +154,7 @@ public :
     }
 
     void drawExcetuting(float x, float y) {
-        al_draw_line(x-1, y-30, x+1, y-30, al_map_rgb(0, 0, 0), 1);
+        al_draw_line(x-1, y, x+1, y-30, al_map_rgb(0, 0, 0), 1);
     }
 
     void drawTimeLine(float y11, float thickness) {
