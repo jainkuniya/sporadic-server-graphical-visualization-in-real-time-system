@@ -239,7 +239,7 @@ int main() {
     al_start_thread(therad_6);
 
     engine e;
-     
+    float timeLabelDis = (CONTENT_END_X - CONTENT_START_X)/MAX_TIME;
     for(float i = 0; i < LOOP_TILL; i += 1) {
         al_clear_to_color(al_map_rgb(255, 255, 255));
 
@@ -250,8 +250,8 @@ int main() {
         // draw time label
         // 1 block 1 second
         for(int j=0; j<MAX_TIME; j++){
-            //float xCor = CONTENT_START_X + j*(totalTimeLineLength/MAX_TIME);
-            float xCor = CONTENT_START_X + j*(float)((int)1130/(int)25);
+            float xCor = CONTENT_START_X + j*timeLabelDis;
+            //float xCor = CONTENT_START_X + j*(float)((int)1130/(int)25);
             float yCor = CONTENT_END_Y +20;
             // printf("%.6f %.6f %.6f\n", xCor, yCor, (float)((int)1130/(int)25));
             e.drawTimeLabelLine(xCor, yCor);
