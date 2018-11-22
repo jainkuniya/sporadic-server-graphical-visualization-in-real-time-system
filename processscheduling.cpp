@@ -315,7 +315,7 @@ int main() {
         }
 
         // draw server status (active/idle) line
-        e.drawServerStatusLine(CONTENT_END_Y + 20 - (TOTAL_HEIGHT/4.5));
+        e.drawServerStatusLine(CONTENT_END_Y + 20 - (TOTAL_HEIGHT/4));
 
         // draw aperopic task line
         e.drawServerCapacityTimeLine(CONTENT_END_Y + 20 - 3);
@@ -330,7 +330,7 @@ int main() {
         // draw server capacity label
         for(int j=0; j<5; j++){
             // cout << CONTENT_END_Y+20 - (j)*serverCapacityLabelDis << "\n";
-            e.drawServerLabelLine(CONTENT_END_Y+20 - (j)*serverCapacityLabelDis);
+            e.drawServerLabelLine(CONTENT_END_Y - 10 - (j)*serverCapacityLabelDis);
         }
 
         // move current time line
@@ -376,7 +376,7 @@ static void *ServerCapacityFunc(ALLEGRO_THREAD *thr, void *arg){
         }
 
         data->serverCapacityCor.push_back(
-            ServerCapacityCordinate(CONTENT_START_X+i, CONTENT_END_Y + 20 - (float)(data->currentCapacity-1) * serverCapacityLabelDis));
+            ServerCapacityCordinate(CONTENT_START_X+i, CONTENT_END_Y + 20 - (float)(data->currentCapacity) * serverCapacityLabelDis));
         
         al_unlock_mutex(data->mutex);
         // cout << CONTENT_END_Y + 20 - (data->currentCapacity-1) * serverCapacityLabelDis << "\n";
