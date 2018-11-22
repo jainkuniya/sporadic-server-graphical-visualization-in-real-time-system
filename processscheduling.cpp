@@ -28,6 +28,7 @@
 using namespace std;
 
 static void *Func_Thread(ALLEGRO_THREAD *thr, void *arg);
+static void *CurrentTimeFunc(ALLEGRO_THREAD *thr, void *arg);
 
 class PeriodicTask {
     public:
@@ -83,6 +84,7 @@ class DATA{
       float          cs;
       float          ts;
       float          currentCapacity;
+      float          currentTime = CONTENT_START_X;
 
    DATA() : mutex(al_create_mutex()),
             cond(al_create_cond()),
@@ -159,6 +161,7 @@ int main() {
 
     ALLEGRO_THREAD      *thread_1    = NULL;
     ALLEGRO_THREAD      *thread_2    = NULL;
+    ALLEGRO_THREAD      *thread_3    = NULL; // thread to show current time, red line
 
     DATA data;
     PeriodicTask threadData1 = PeriodicTask(1, 5, 0, 10);
@@ -174,8 +177,10 @@ int main() {
     data.aperiodicTask.push_back(aperiodicTask2);
     thread_1 = al_create_thread(Func_Thread, &data);
     thread_2 = al_create_thread(Func_Thread, &data);
+    thread_3 = al_create_thread(CurrentTimeFunc, &data);
     al_start_thread(thread_1);
     al_start_thread(thread_2);
+    al_start_thread(thread_3);
 
     engine e;
      
@@ -225,7 +230,7 @@ int main() {
         }
 
         // move current time line
-        e.drawCurrentTimeLine(CONTENT_START_X + i);
+        e.drawCurrentTimeLine(data.currentTime);
 
         if(i==0){
             // wait before eyes are setup
@@ -239,6 +244,7 @@ int main() {
 
     al_destroy_thread(thread_1);
     al_destroy_thread(thread_2);
+    al_destroy_thread(thread_3);
 
     al_destroy_display(display);
     return 0;
@@ -272,17 +278,25 @@ static void *Func_Thread(ALLEGRO_THREAD *thr, void *arg){
         al_rest(WAIT_FACTOR);
     }
 
+   return NULL;
+}
 
+static void *CurrentTimeFunc(ALLEGRO_THREAD *thr, void *arg){
 
-//     while(!al_get_thread_should_stop(thr)){
+    DATA *data  = (DATA*) arg;
 
-//       al_lock_mutex(data->mutex);
-      
-//       al_unlock_mutex(data->mutex);
+    for(float i = 0; i < LOOP_TILL; i += 1) {
+        if(i==0){
+            // wait before eyes are setup
+            al_rest(INITAL_WAIT);
+        }
 
-//       al_rest(0.01);
+        al_lock_mutex(data->mutex);
+        data->currentTime = CONTENT_START_X + i;
+        al_unlock_mutex(data->mutex);
 
-//    }
+        al_rest(WAIT_FACTOR);
+    }
 
    return NULL;
-   }
+}
