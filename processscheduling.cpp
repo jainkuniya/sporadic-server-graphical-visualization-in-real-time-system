@@ -39,6 +39,7 @@ class PeriodicTask {
         int d;
         bool isAquired;
     public:
+        PeriodicTask() {}
         PeriodicTask(int com, int ti, int arrival, int deadline) {
             c =com;
             t= ti;
@@ -281,13 +282,26 @@ static void *PeriodicTaskFunc(ALLEGRO_THREAD *thr, void *arg){
     DATA *data  = (DATA*) arg;
     float num   = 0.1;
 
-    al_lock_mutex(data->mutex);
+    // get unaquired thread
+    PeriodicTask threadData;
+    bool foundTask = false;
+    for(std::vector<int>::size_type processCount = 0; 
+            processCount != data->threads.size(); 
+            processCount++) {
+                if(!data->threads[processCount].isAquired){
+                    al_lock_mutex(data->mutex);
+                    data->threads[processCount].isAquired = true;
+                    al_unlock_mutex(data->mutex);
+                    threadData = data->threads[processCount];
+                    foundTask = true;
+                    break;
+                }
+    }
 
-    bool modi_X = data->modi_X;
-    data->ready = true;
-    al_broadcast_cond(data->cond);
-
-    al_unlock_mutex(data->mutex);
+    if(!foundTask) {
+        printf("No task founf for this thread, returning\n");
+        return NULL;
+    }
 
     for(float i = 0; i < LOOP_TILL; i += 1) {
         if(i==0){
