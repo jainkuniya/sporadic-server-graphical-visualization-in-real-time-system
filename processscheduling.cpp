@@ -30,6 +30,7 @@ using namespace std;
 static void *PeriodicTaskFunc(ALLEGRO_THREAD *thr, void *arg);
 static void *CurrentTimeFunc(ALLEGRO_THREAD *thr, void *arg);
 static void *ServerCapacityFunc(ALLEGRO_THREAD *thr, void *arg);
+static void *AperiodicTaskFunc(ALLEGRO_THREAD *thr, void *arg);
 
 class PeriodicTask {
     public:
@@ -164,7 +165,8 @@ int main() {
     ALLEGRO_THREAD      *thread_1    = NULL;
     ALLEGRO_THREAD      *thread_2    = NULL;
     ALLEGRO_THREAD      *thread_3    = NULL; // thread to show current time, red line
-    ALLEGRO_THREAD      *thread_4    = NULL; // thread to show current time, red line
+    ALLEGRO_THREAD      *thread_4    = NULL; // thread to cal server capacity, graph
+    ALLEGRO_THREAD      *thread_5    = NULL; // thread for apperiodic tasks
 
     DATA data;
     PeriodicTask threadData1 = PeriodicTask(1, 5, 0, 10);
@@ -182,10 +184,12 @@ int main() {
     thread_2 = al_create_thread(PeriodicTaskFunc, &data);
     thread_3 = al_create_thread(CurrentTimeFunc, &data);
     thread_4 = al_create_thread(ServerCapacityFunc, &data);
+    thread_5 = al_create_thread(AperiodicTaskFunc, &data);
     al_start_thread(thread_1);
     al_start_thread(thread_2);
     al_start_thread(thread_3);
     al_start_thread(thread_4);
+    al_start_thread(thread_5);
 
     engine e;
      
@@ -250,6 +254,8 @@ int main() {
     al_destroy_thread(thread_1);
     al_destroy_thread(thread_2);
     al_destroy_thread(thread_3);
+    al_destroy_thread(thread_4);
+    al_destroy_thread(thread_5);
 
     al_destroy_display(display);
     return 0;
@@ -276,11 +282,51 @@ static void *ServerCapacityFunc(ALLEGRO_THREAD *thr, void *arg){
    return NULL;
 }
 
+static void *AperiodicTaskFunc(ALLEGRO_THREAD *thr, void *arg){
+
+    DATA *data  = (DATA*) arg;
+
+    // get unaquired thread
+    // PeriodicTask threadData;
+    // bool foundTask = false;
+    // for(std::vector<int>::size_type processCount = 0; 
+    //         processCount != data->threads.size(); 
+    //         processCount++) {
+    //             if(!data->threads[processCount].isAquired){
+    //                 al_lock_mutex(data->mutex);
+    //                 data->threads[processCount].isAquired = true;
+    //                 al_unlock_mutex(data->mutex);
+    //                 threadData = data->threads[processCount];
+    //                 foundTask = true;
+    //                 break;
+    //             }
+    // }
+
+    // if(!foundTask) {
+    //     printf("No task found for this thread, returning\n");
+    //     return NULL;
+    // }
+
+    // for(float i = 0; i < LOOP_TILL; i += 1) {
+    //     if(i==0){
+    //         // wait before eyes are setup
+    //         al_rest(INITAL_WAIT);
+    //     }
+
+    //     // al_lock_mutex(data->mutex);
+        
+    //     // al_unlock_mutex(data->mutex);
+
+    //     al_rest(WAIT_FACTOR);
+    // }
+
+   return NULL;
+}
+
 
 static void *PeriodicTaskFunc(ALLEGRO_THREAD *thr, void *arg){
 
     DATA *data  = (DATA*) arg;
-    float num   = 0.1;
 
     // get unaquired thread
     PeriodicTask threadData;
@@ -299,7 +345,7 @@ static void *PeriodicTaskFunc(ALLEGRO_THREAD *thr, void *arg){
     }
 
     if(!foundTask) {
-        printf("No task founf for this thread, returning\n");
+        printf("No task found for this thread, returning\n");
         return NULL;
     }
 
