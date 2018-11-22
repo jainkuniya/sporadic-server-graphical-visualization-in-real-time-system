@@ -4,6 +4,8 @@
 #include <allegro5/allegro_primitives.h>
 #include <cmath>
 #include <vector>
+#include <string>
+#include <iostream>
 
 #define PI M_PI
 
@@ -33,6 +35,20 @@ static void *ServerCapacityFunc(ALLEGRO_THREAD *thr, void *arg);
 static void *AperiodicTaskFunc(ALLEGRO_THREAD *thr, void *arg);
 static void *SchedularFunc(ALLEGRO_THREAD *thr, void *arg);
 
+class Task {
+    public:
+        int c;
+        int a;
+        int d;
+        int completed = 0;
+    public:
+        Task(int com, int arr, int dead){
+            c=com;
+            a=arr;
+            d=dead;
+        }
+};
+
 class PeriodicTask {
     public:
         int c;
@@ -41,9 +57,12 @@ class PeriodicTask {
         int d;
         bool isAquired;
         int pr;
+        vector <Task> tasks;
+        string name;
     public:
         PeriodicTask() {}
-        PeriodicTask(int com, int ti, int arrival, int deadline, int priority) {
+        PeriodicTask(string na, int com, int ti, int arrival, int deadline, int priority) {
+            name = na;
             c =com;
             t= ti;
             a=arrival;
@@ -175,8 +194,8 @@ int main() {
     ALLEGRO_THREAD      *therad_6    = NULL; // thread to schedule
 
     DATA data;
-    PeriodicTask threadData1 = PeriodicTask(1, 5, 0, 10, 1);
-    PeriodicTask threadData2 = PeriodicTask(2, 10, 0, 20, 3);
+    PeriodicTask threadData1 = PeriodicTask("Periodic Task 1", 1, 5, 0, 5, 1);
+    PeriodicTask threadData2 = PeriodicTask("Periodic Task 2", 4, 15, 0, 15, 3);
     data.threads.push_back(threadData1);
     data.threads.push_back(threadData2);
     data.cs = 5;
@@ -324,7 +343,7 @@ static void *AperiodicTaskFunc(ALLEGRO_THREAD *thr, void *arg){
         }
 
         // al_lock_mutex(data->mutex);
-        printf("%.6f\n", i*WAIT_FACTOR);
+        // printf("%.6f\n", i*WAIT_FACTOR);
         // al_unlock_mutex(data->mutex);
 
         al_rest(WAIT_FACTOR);
@@ -340,7 +359,7 @@ static void *PeriodicTaskFunc(ALLEGRO_THREAD *thr, void *arg){
 
     // get unaquired thread
     PeriodicTask threadData;
-    bool foundTask = false;
+    int taskIndex = -1;
     for(std::vector<int>::size_type processCount = 0; 
             processCount != data->threads.size(); 
             processCount++) {
@@ -349,16 +368,17 @@ static void *PeriodicTaskFunc(ALLEGRO_THREAD *thr, void *arg){
                     data->threads[processCount].isAquired = true;
                     al_unlock_mutex(data->mutex);
                     threadData = data->threads[processCount];
-                    foundTask = true;
+                    taskIndex = processCount;
                     break;
                 }
     }
 
-    if(!foundTask) {
+    if(taskIndex == -1) {
         printf("No task found for this thread, returning\n");
         return NULL;
     }
 
+    int doneWithSec = -1;
     for(float i = 0; i < LOOP_TILL; i += 1) {
         if(i==0){
             // wait before eyes are setup
@@ -366,10 +386,22 @@ static void *PeriodicTaskFunc(ALLEGRO_THREAD *thr, void *arg){
         }
 
         // al_lock_mutex(data->mutex);
+        int currentTime = i*WAIT_FACTOR;
+
+        if(doneWithSec != currentTime) {
+            if(currentTime % threadData.t == threadData.a){
+                // new instace arrived
+                // push to queue
+                data->threads[taskIndex].tasks
+                    .push_back(Task(threadData.c, currentTime, threadData.d + currentTime));
+                cout << threadData.name << ": new instance arrived c:" << threadData.c << ", arrived at:" << currentTime << ", absolute deadline:" << threadData.d + currentTime << "\n"; 
+            }  
+        }
         
         // al_unlock_mutex(data->mutex);
 
         al_rest(WAIT_FACTOR);
+        doneWithSec = currentTime; 
     }
 
    return NULL;
