@@ -88,7 +88,7 @@ public :
     }
 
     void drawServerCapacityTimeLine(float y1){
-        al_draw_line(50, y1, TOTAL_WIDTH - 50, y1, al_map_rgb(0, 255, 0), 3);
+        al_draw_line(50, y1, TOTAL_WIDTH - 50, y1, al_map_rgb(0, 255, 0), 2);
     }
 
     void drawProcessLine(float x1) {
@@ -101,6 +101,10 @@ public :
 
     void drawTimeLabelLine(float x1, float y){
         drawLine(x1, y-10 , x1, y+10, 2);
+    }
+
+    void drawServerLabelLine(float y1){
+        drawLine(50, y1 , 70, y1, 2);
     }
 };
 
@@ -148,7 +152,7 @@ int main() {
         e.drawProcessLine(x1 + 60);
 
         // draw time label
-        // 1 block i second
+        // 1 block 1 second
         float tempX = x1 + 60;
         for(int j=0; j<25; j++){
             e.drawTimeLabelLine(tempX + j*40, y2 + 20);
@@ -166,6 +170,12 @@ int main() {
 
         // draw aperopic task line
         e.drawServerCapacityTimeLine(y2 + 20 - 3);
+
+        // draw server capacity label
+        float tempY = y2 + 20;
+        for(int j=0; j<5; j++){
+            e.drawServerLabelLine(tempY - (j)*30);
+        }
 
         // move current time line
         e.drawCurrentTimeLine(x1 + 60 + i);
