@@ -379,7 +379,7 @@ static void *SchedularFunc(ALLEGRO_THREAD *thr, void *arg){
     al_rest(INITAL_WAIT);
     // wait before eyes are setup
 
-    while(1) {
+    while(!al_get_thread_should_stop(thr)){
 
         int newPrio = 99;
         for(std::vector<int>::size_type taskCount = 0; 
