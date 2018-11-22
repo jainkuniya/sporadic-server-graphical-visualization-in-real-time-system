@@ -15,7 +15,7 @@ using namespace std;
 
 static void *Func_Thread(ALLEGRO_THREAD *thr, void *arg);
 
-class ThreadData {
+class PeriodicTask {
     public:
         int c;
         int t;
@@ -23,7 +23,7 @@ class ThreadData {
         int d;
         bool isAquired;
     public:
-        ThreadData(int com, int ti, int arrival, int deadline) {
+        PeriodicTask(int com, int ti, int arrival, int deadline) {
             c =com;
             t= ti;
             a=arrival;
@@ -41,7 +41,7 @@ class DATA{
       float          posiY;
       bool           modi_X;
       bool           ready;
-      vector <ThreadData> threads;
+      vector <PeriodicTask> threads;
       float          cs;
       float          ts;
 
@@ -101,8 +101,8 @@ int main() {
     ALLEGRO_THREAD      *thread_2    = NULL;
 
     DATA data;
-    ThreadData threadData1 = ThreadData(1, 5, 0, 10);
-    ThreadData threadData2 = ThreadData(2, 10, 0, 20);
+    PeriodicTask threadData1 = PeriodicTask(1, 5, 0, 10);
+    PeriodicTask threadData2 = PeriodicTask(2, 10, 0, 20);
     data.threads.push_back(threadData1);
     data.threads.push_back(threadData2);
     data.cs = 5;
