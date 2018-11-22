@@ -257,6 +257,7 @@ int main() {
             e.drawTimeLabelLine(xCor, yCor);
         }
 
+        al_lock_mutex(data.mutex);
         // draw each process line
         for(std::vector<int>::size_type processCount = 0; 
             processCount != data.threads.size(); 
@@ -324,6 +325,8 @@ int main() {
         // move current time line
         e.drawCurrentTimeLine(data.currentTime);
 
+        al_unlock_mutex(data.mutex);
+
         if(i==0){
             // wait before eyes are setup
             al_flip_display();
@@ -354,18 +357,19 @@ static void *ServerCapacityFunc(ALLEGRO_THREAD *thr, void *arg){
             // wait before eyes are setup
             al_rest(INITAL_WAIT);
         }
+        
+        al_lock_mutex(data->mutex);
 
         if(data->currentExc == data->ps) {
-            al_lock_mutex(data->mutex);
             data->currentCapacity = data->currentCapacity - WAIT_FACTOR;
-            al_unlock_mutex(data->mutex);
         }
 
-        al_lock_mutex(data->mutex);
         data->serverCapacityCor.push_back(
             ServerCapacityCordinate(CONTENT_START_X+i, CONTENT_END_Y + 20 - (float)(data->currentCapacity-1) * serverCapacityLabelDis));
+        
         al_unlock_mutex(data->mutex);
         // cout << CONTENT_END_Y + 20 - (data->currentCapacity-1) * serverCapacityLabelDis << "\n";
+        
         al_rest(WAIT_FACTOR);
     }
 
@@ -381,6 +385,7 @@ static void *SchedularFunc(ALLEGRO_THREAD *thr, void *arg){
 
     while(!al_get_thread_should_stop(thr)){
 
+        al_lock_mutex(data->mutex);
         int newPrio = 99;
         for(std::vector<int>::size_type taskCount = 0; 
                 taskCount != data->threads.size(); 
@@ -398,11 +403,10 @@ static void *SchedularFunc(ALLEGRO_THREAD *thr, void *arg){
         // check if priority changed
         if(newPrio != data->currentExc) {
             // cout << "Giving priority to: " << newPrio << "\n";
-            al_lock_mutex(data->mutex);
+            
             data->currentExc = newPrio;
-            al_unlock_mutex(data->mutex); 
         }
-
+        al_unlock_mutex(data->mutex);
         // al_rest(WAIT_FACTOR);
     }
 
@@ -420,6 +424,7 @@ static void *AperiodicTaskFunc(ALLEGRO_THREAD *thr, void *arg){
             al_rest(INITAL_WAIT);
         }
 
+        al_lock_mutex(data->mutex);
         int currentTime = i*WAIT_FACTOR;
 
         if(doneWithSec != currentTime) {
@@ -432,13 +437,12 @@ static void *AperiodicTaskFunc(ALLEGRO_THREAD *thr, void *arg){
                     // push to queue
                     cout << "Aperiodic Task" << ": new instance arrived c:" << data->aperiodicTask[taskCount].c << ", arrived at:" << currentTime <<  "\n"; //", absolute deadline:" << threadData.d + currentTime << "\n"; 
 
-                    al_lock_mutex(data->mutex);
+                
                     data->sVerLines
                         .push_back(CONTENT_START_X + i);
 
                     // mark want CPU true
-                    data->serverWantCPU = true;
-                    al_unlock_mutex(data->mutex);    
+                    data->serverWantCPU = true;   
                 }
             }
         }
@@ -458,30 +462,25 @@ static void *AperiodicTaskFunc(ALLEGRO_THREAD *thr, void *arg){
 
                         if(data->currentExc == data->ps) {
                             // exec task
-                            al_lock_mutex(data->mutex);
                             data->aperiodicTask[taskCount].completed +=  WAIT_FACTOR;
                             data->aperiodicTask[taskCount].excecuting.push_back(CONTENT_START_X + i);
                             // cout << "Pushing " << i << "\n";
-                            al_unlock_mutex(data->mutex);
                         }else {
                             // request for exc if already not requested
                             if(!data->serverWantCPU) {
                                 // cout << "Aperiodic task: Requesting CPU.\n";
-                                al_lock_mutex(data->mutex);
                                 data->serverWantCPU = true;
-                                al_unlock_mutex(data->mutex);
                             }
                         }
                 }else {
                         // do not need CPU
                         if(data->serverWantCPU) {
                             // cout << "Aperiodic task: Returing CPU." << "\n";
-                            al_lock_mutex(data->mutex);
                             data->serverWantCPU = false;
-                            al_unlock_mutex(data->mutex);
                         }
                 }
         }
+        al_unlock_mutex(data->mutex); 
         // cout << i << "\n";
         al_rest(WAIT_FACTOR);
         doneWithSec = currentTime;
@@ -523,6 +522,8 @@ static void *PeriodicTaskFunc(ALLEGRO_THREAD *thr, void *arg){
             al_rest(INITAL_WAIT);
         }
 
+        al_lock_mutex(data->mutex);
+
         // al_lock_mutex(data->mutex);
         int currentTime = i*WAIT_FACTOR;
 
@@ -530,13 +531,11 @@ static void *PeriodicTaskFunc(ALLEGRO_THREAD *thr, void *arg){
             if(currentTime % (int)threadData.t == threadData.a){
                 // new instace arrived
                 // push to queue
-                al_lock_mutex(data->mutex);
                 data->threads[taskIndex].tasks
                     .push_back(Task(threadData.c, currentTime, threadData.d + currentTime));
                 data->threads[taskIndex].verLines
                     .push_back(CONTENT_START_X + i);
                 data->threads[taskIndex].wantCPU = true;
-                al_unlock_mutex(data->mutex);
                 cout << threadData.name << ": new instance arrived c:" << threadData.c << ", arrived at:" << currentTime << ", absolute deadline:" << threadData.d + currentTime << "\n"; 
 
             }  
@@ -556,18 +555,14 @@ static void *PeriodicTaskFunc(ALLEGRO_THREAD *thr, void *arg){
 
                         if(data->currentExc == data->threads[taskIndex].pr) {
                             // exec task
-                            al_lock_mutex(data->mutex);
                             data->threads[taskIndex].tasks[instanceCount].completed +=  WAIT_FACTOR;
                             data->threads[taskIndex].tasks[instanceCount].excecuting.push_back(CONTENT_START_X + i);
                             // cout << "Pushing " << i << "\n";
-                            al_unlock_mutex(data->mutex);
                         }else {
                             // request for exc if already not requested
                             if(!data->threads[taskIndex].wantCPU) {
                                 // cout << "Aperiodic task: Requesting CPU.\n";
-                                al_lock_mutex(data->mutex);
                                 data->threads[taskIndex].wantCPU = true;
-                                al_unlock_mutex(data->mutex);
                             }
                         }
                 }
@@ -575,13 +570,11 @@ static void *PeriodicTaskFunc(ALLEGRO_THREAD *thr, void *arg){
                         // do not need CPU
                         if(data->threads[taskIndex].wantCPU) {
                             // cout << "Aperiodic task: Returing CPU." << "\n";
-                            al_lock_mutex(data->mutex);
                             data->threads[taskIndex].wantCPU = false;
-                            al_unlock_mutex(data->mutex);
                         }
                 }
         }
-
+        al_unlock_mutex(data->mutex);
         al_rest(WAIT_FACTOR);
         doneWithSec = currentTime; 
     }
