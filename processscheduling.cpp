@@ -402,7 +402,7 @@ static void *SchedularFunc(ALLEGRO_THREAD *thr, void *arg){
 
         // check if priority changed
         if(newPrio != data->currentExc) {
-            // cout << "Giving priority to: " << newPrio << "\n";
+            cout << "Giving priority to: " << newPrio << "\n";
             
             data->currentExc = newPrio;
         }
