@@ -153,10 +153,6 @@ int main() {
     float x1 = 60,y1 = 220, x2 = TOTAL_WIDTH-50, y2 = TOTAL_HEIGHT - 50;
     float separationDis = 100;
     float totalTimeLine = x2-x1;
-
-    // // wait before eyes are setup
-    // al_clear_to_color(al_map_rgb(255, 255, 255));
-    // al_rest(3);
      
     for(float i = 0; i < LOOP_TILL; i += 1) {
         al_clear_to_color(al_map_rgb(255, 255, 255));
@@ -194,7 +190,13 @@ int main() {
         }
 
         // move current time line
-        e.drawCurrentTimeLine(x1 + 60 + i);
+        e.drawCurrentTimeLine(x1 + i);
+
+        if(i==0){
+            // wait before eyes are setup
+            al_flip_display();
+            al_rest(3);
+        }
         
         al_flip_display();
         al_rest(WAIT_FACTOR);
