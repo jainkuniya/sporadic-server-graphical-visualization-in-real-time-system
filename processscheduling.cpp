@@ -59,7 +59,7 @@ class PeriodicTask {
         int pr;
         vector <Task> tasks;
         string name;
-        vector <int> verLines;
+        vector <float> verLines;
         bool wantCPU = false;
     public:
         PeriodicTask() {}
@@ -78,6 +78,7 @@ class AperiodicTask {
         float c;
         float a;
         float completed = 0;
+        vector <float> excecuting;
     public:
         AperiodicTask(int com, int arrival) {
             c =com;
@@ -113,7 +114,7 @@ class DATA{
       float          ts;
       int            ps; // priority of server
       bool           serverWantCPU = false;
-      vector <int>   sVerLines;
+      vector <float>   sVerLines;
 
       float          currentCapacity;
       float          currentTime = CONTENT_START_X;
@@ -149,6 +150,10 @@ public :
 
     void drawSererGraphPoint(ServerCapacityCordinate cor){
         al_draw_line(cor.x-1, cor.y-1, cor.x+1, cor.y+1, al_map_rgb(0, 0, 0), 1);
+    }
+
+    void drawExcetuting(float x, float y) {
+        al_draw_line(x-1, y-30, x+1, y-30, al_map_rgb(0, 0, 0), 1);
     }
 
     void drawTimeLine(float y11, float thickness) {
@@ -274,7 +279,17 @@ int main() {
             lineCount != data.sVerLines.size(); 
             lineCount++) {
                 e.drawVerLines(data.sVerLines[lineCount], yCorServerLine);
-            }
+        }
+        // draw executing
+        for(std::vector<int>::size_type tasks = 0; 
+            tasks != data.aperiodicTask.size(); 
+            tasks++) {
+                for(std::vector<int>::size_type lintCount = 0; 
+                    lintCount != data.aperiodicTask[tasks].excecuting.size(); 
+                    lintCount++) {
+                        e.drawExcetuting(data.aperiodicTask[tasks].excecuting[lintCount], yCorServerLine);
+                    }
+        }
 
         // draw server status (active/idle) line
         e.drawServerStatusLine(CONTENT_END_Y + 20 - (TOTAL_HEIGHT/4.5));
@@ -418,7 +433,6 @@ static void *AperiodicTaskFunc(ALLEGRO_THREAD *thr, void *arg){
         }
         
         
-        bool doneSomeWork = false;
         for(std::vector<int>::size_type taskCount = 0; 
             taskCount != data->aperiodicTask.size(); 
             taskCount++) {
@@ -435,8 +449,9 @@ static void *AperiodicTaskFunc(ALLEGRO_THREAD *thr, void *arg){
                             // exec task
                             al_lock_mutex(data->mutex);
                             data->aperiodicTask[taskCount].completed +=  WAIT_FACTOR;
+                            data->aperiodicTask[taskCount].excecuting.push_back(CONTENT_START_X + i);
+                            // cout << "Pushing " << i << "\n";
                             al_unlock_mutex(data->mutex);
-                            doneSomeWork = true;
                         }else {
                             // request for exc if already not requested
                             if(!data->serverWantCPU) {
