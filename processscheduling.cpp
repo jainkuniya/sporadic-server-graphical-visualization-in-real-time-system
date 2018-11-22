@@ -77,6 +77,7 @@ class AperiodicTask {
     public:
         int c;
         int a;
+        int completed = 0;
     public:
         AperiodicTask(int com, int arrival) {
             c =com;
@@ -381,8 +382,14 @@ static void *AperiodicTaskFunc(ALLEGRO_THREAD *thr, void *arg){
                     // push to queue
                     cout << "Aperiodic Task" << ": new instance arrived c:" << data->aperiodicTask[taskCount].c << ", arrived at:" << currentTime <<  "\n"; //", absolute deadline:" << threadData.d + currentTime << "\n"; 
 
+                    al_lock_mutex(data->mutex);
                     data->sVerLines
                         .push_back(CONTENT_START_X + i);
+                    al_unlock_mutex(data->mutex);
+                    
+
+                    // mark want CPU true
+
                 }
             }
         }
@@ -438,12 +445,15 @@ static void *PeriodicTaskFunc(ALLEGRO_THREAD *thr, void *arg){
             if(currentTime % threadData.t == threadData.a){
                 // new instace arrived
                 // push to queue
+                al_lock_mutex(data->mutex);
                 data->threads[taskIndex].tasks
                     .push_back(Task(threadData.c, currentTime, threadData.d + currentTime));
-                cout << threadData.name << ": new instance arrived c:" << threadData.c << ", arrived at:" << currentTime << ", absolute deadline:" << threadData.d + currentTime << "\n"; 
-
                 data->threads[taskIndex].verLines
                     .push_back(CONTENT_START_X + i);
+                al_unlock_mutex(data->mutex);
+
+                cout << threadData.name << ": new instance arrived c:" << threadData.c << ", arrived at:" << currentTime << ", absolute deadline:" << threadData.d + currentTime << "\n"; 
+
             }  
         }
         
