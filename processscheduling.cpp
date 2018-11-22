@@ -35,6 +35,17 @@ static void *ServerCapacityFunc(ALLEGRO_THREAD *thr, void *arg);
 static void *AperiodicTaskFunc(ALLEGRO_THREAD *thr, void *arg);
 static void *SchedularFunc(ALLEGRO_THREAD *thr, void *arg);
 
+class Replenish {
+    public:
+        float c;
+        float t;
+    public:
+        Replenish(int com, int tim){
+            c=com;
+            t=tim;
+        }
+};
+
 class Task {
     public:
         float c;
@@ -416,6 +427,7 @@ static void *SchedularFunc(ALLEGRO_THREAD *thr, void *arg){
 static void *AperiodicTaskFunc(ALLEGRO_THREAD *thr, void *arg){
 
     DATA *data  = (DATA*) arg;
+    vector<Replenish> replenish;
 
     int doneWithSec = -1;
     for(float i = 0; i < LOOP_TILL; i += 1) {
@@ -428,13 +440,23 @@ static void *AperiodicTaskFunc(ALLEGRO_THREAD *thr, void *arg){
         int currentTime = i*WAIT_FACTOR;
 
         if(doneWithSec != currentTime) {
+            // check for replemish
+            for(std::vector<int>::size_type index = 0; 
+                index != replenish.size(); 
+                index++) {
+                    if(replenish[index].t == currentTime) {
+                        data->currentCapacity += replenish[index].c;
+                    }
+            }
+
+            // check for new instance        
             for(std::vector<int>::size_type taskCount = 0; 
                 taskCount != data->aperiodicTask.size(); 
                 taskCount++) {
 
                 if(currentTime == (int)data->aperiodicTask[taskCount].a){
-                    // new instace arrived
                     // push to queue
+                    // new instace arrived
                     cout << "Aperiodic Task" << ": new instance arrived c:" << data->aperiodicTask[taskCount].c << ", arrived at:" << currentTime <<  "\n"; //", absolute deadline:" << threadData.d + currentTime << "\n"; 
 
                 
@@ -461,6 +483,10 @@ static void *AperiodicTaskFunc(ALLEGRO_THREAD *thr, void *arg){
                     && currentTime >= data->aperiodicTask[taskCount].a){
                         temp++;
                         if(data->currentExc == data->ps) {
+                            // if first time excetuting then add to replenish list
+                            if(data->aperiodicTask[taskCount].completed == 0){
+                                replenish.push_back(Replenish(data->aperiodicTask[taskCount].c, data->ts + currentTime));
+                            }
                             // exec task
                             data->aperiodicTask[taskCount].completed +=  WAIT_FACTOR;
                             data->aperiodicTask[taskCount].excecuting.push_back(CONTENT_START_X + i);
