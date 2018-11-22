@@ -59,6 +59,7 @@ class PeriodicTask {
         int pr;
         vector <Task> tasks;
         string name;
+        vector <int> verLines;
     public:
         PeriodicTask() {}
         PeriodicTask(string na, int com, int ti, int arrival, int deadline, int priority) {
@@ -135,6 +136,12 @@ public :
         al_draw_line(x11, y11, x22, y22, al_map_rgb(0, 0, 0), thickness);
     }
 
+    void drawVerLines(float x, float y){
+        al_draw_line(x-5, y-35, x, y-40, al_map_rgb(0, 0, 0), 2);
+        al_draw_line(x+5, y-35, x, y-40, al_map_rgb(0, 0, 0), 2);
+        al_draw_line(x, y, x, y-40, al_map_rgb(0, 0, 0), 2);
+    }
+
     void drawSererGraphPoint(ServerCapacityCordinate cor){
         al_draw_line(cor.x-2, cor.y-2, cor.x+2, cor.y+2, al_map_rgb(0, 0, 0), 2);
     }
@@ -194,8 +201,8 @@ int main() {
     ALLEGRO_THREAD      *therad_6    = NULL; // thread to schedule
 
     DATA data;
-    PeriodicTask threadData1 = PeriodicTask("Periodic Task 1", 1, 5, 0, 5, 1);
-    PeriodicTask threadData2 = PeriodicTask("Periodic Task 2", 4, 15, 0, 15, 3);
+    PeriodicTask threadData2 = PeriodicTask("Periodic Task 1", 1, 5, 0, 5, 1);
+    PeriodicTask threadData1 = PeriodicTask("Periodic Task 2", 4, 15, 0, 15, 3);
     data.threads.push_back(threadData1);
     data.threads.push_back(threadData2);
     data.cs = 5;
@@ -243,7 +250,15 @@ int main() {
         for(std::vector<int>::size_type processCount = 0; 
             processCount != data.threads.size(); 
             processCount++) {
-                e.drawTimeLine(CONTENT_END_Y + 20 - (TOTAL_HEIGHT/2.5) - (processCount + 1 )*processLineSeparationDis, 3);
+                float yCor = CONTENT_END_Y + 20 - (TOTAL_HEIGHT/2.5) - (processCount + 1 )*processLineSeparationDis;
+                e.drawTimeLine(yCor, 3);
+        
+            // draw instace arrive ver lines
+            for(std::vector<int>::size_type lineCount = 0; 
+                lineCount != data.threads[processCount].verLines.size(); 
+                lineCount++) {
+                    e.drawVerLines(data.threads[processCount].verLines[lineCount], yCor);
+                }
         }
 
         // draw aperopic task line
@@ -395,6 +410,9 @@ static void *PeriodicTaskFunc(ALLEGRO_THREAD *thr, void *arg){
                 data->threads[taskIndex].tasks
                     .push_back(Task(threadData.c, currentTime, threadData.d + currentTime));
                 cout << threadData.name << ": new instance arrived c:" << threadData.c << ", arrived at:" << currentTime << ", absolute deadline:" << threadData.d + currentTime << "\n"; 
+
+                data->threads[taskIndex].verLines
+                    .push_back(CONTENT_START_X + i);
             }  
         }
         
