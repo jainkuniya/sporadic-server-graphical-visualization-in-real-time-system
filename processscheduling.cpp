@@ -457,7 +457,7 @@ static void *AperiodicTaskFunc(ALLEGRO_THREAD *thr, void *arg){
                 }
                 // cout << data->aperiodicTask[taskCount].completed << " " << data->aperiodicTask[taskCount].a << "\n";
                 // if task not completed excecute it
-                if(data->aperiodicTask[taskCount].c > data->aperiodicTask[taskCount].completed 
+                if(data->aperiodicTask[taskCount].c - data->aperiodicTask[taskCount].completed > 0.05
                     && currentTime >= data->aperiodicTask[taskCount].a){
                         temp++;
                         if(data->currentExc == data->ps) {
@@ -549,7 +549,7 @@ static void *PeriodicTaskFunc(ALLEGRO_THREAD *thr, void *arg){
                 }
 
                 // if task not completed excecute it
-                if(data->threads[taskIndex].tasks[instanceCount].c > data->threads[taskIndex].tasks[instanceCount].completed 
+                if(data->threads[taskIndex].tasks[instanceCount].c - data->threads[taskIndex].tasks[instanceCount].completed > 0.05
                     && currentTime >= data->threads[taskIndex].tasks[instanceCount].a){
                         temp++;
                         if(data->currentExc == data->threads[taskIndex].pr) {
