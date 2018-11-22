@@ -112,6 +112,8 @@ class DATA{
       float          ts;
       int            ps; // priority of server
       bool           serverWantCPU = false;
+      vector <int>   sVerLines;
+
       float          currentCapacity;
       float          currentTime = CONTENT_START_X;
       int            currentExc;
@@ -255,7 +257,7 @@ int main() {
                 float yCor = CONTENT_END_Y + 20 - (TOTAL_HEIGHT/2.5) - (processCount + 1 )*processLineSeparationDis;
                 e.drawTimeLine(yCor, 3);
         
-            // draw instace arrive ver lines
+            // draw instance arrive ver lines
             for(std::vector<int>::size_type lineCount = 0; 
                 lineCount != data.threads[processCount].verLines.size(); 
                 lineCount++) {
@@ -264,7 +266,14 @@ int main() {
         }
 
         // draw aperopic task line
-        e.drawAperiodicTaskTimeLine(CONTENT_END_Y + 20 - (TOTAL_HEIGHT/2.5));
+        float yCorServerLine = CONTENT_END_Y + 20 - (TOTAL_HEIGHT/2.5);
+        e.drawAperiodicTaskTimeLine(yCorServerLine);
+        // draw instance arrive ver lines
+        for(std::vector<int>::size_type lineCount = 0; 
+            lineCount != data.sVerLines.size(); 
+            lineCount++) {
+                e.drawVerLines(data.sVerLines[lineCount], yCorServerLine);
+            }
 
         // draw server status (active/idle) line
         e.drawServerStatusLine(CONTENT_END_Y + 20 - (TOTAL_HEIGHT/4.5));
@@ -353,10 +362,29 @@ static void *AperiodicTaskFunc(ALLEGRO_THREAD *thr, void *arg){
 
     DATA *data  = (DATA*) arg;
 
+    int doneWithSec = -1;
     for(float i = 0; i < LOOP_TILL; i += 1) {
         if(i==0){
             // wait before eyes are setup
             al_rest(INITAL_WAIT);
+        }
+
+        int currentTime = i*WAIT_FACTOR;
+
+        if(doneWithSec != currentTime) {
+            for(std::vector<int>::size_type taskCount = 0; 
+                taskCount != data->aperiodicTask.size(); 
+                taskCount++) {
+
+                if(currentTime == (int)data->aperiodicTask[taskCount].a){
+                    // new instace arrived
+                    // push to queue
+                    cout << "Aperiodic Task" << ": new instance arrived c:" << data->aperiodicTask[taskCount].c << ", arrived at:" << currentTime <<  "\n"; //", absolute deadline:" << threadData.d + currentTime << "\n"; 
+
+                    data->sVerLines
+                        .push_back(CONTENT_START_X + i);
+                }
+            }
         }
 
         // al_lock_mutex(data->mutex);
@@ -364,6 +392,7 @@ static void *AperiodicTaskFunc(ALLEGRO_THREAD *thr, void *arg){
         // al_unlock_mutex(data->mutex);
 
         al_rest(WAIT_FACTOR);
+        doneWithSec = currentTime;
     }
 
    return NULL;
