@@ -349,11 +349,10 @@ static void *SchedularFunc(ALLEGRO_THREAD *thr, void *arg){
 
     DATA *data  = (DATA*) arg;
 
-    for(float i = 0; i < LOOP_TILL; i += 1) {
-        if(i==0){
-            // wait before eyes are setup
-            al_rest(INITAL_WAIT);
-        }
+    al_rest(INITAL_WAIT);
+    // wait before eyes are setup
+
+    while(1) {
 
         int newPrio = 99;
         for(std::vector<int>::size_type taskCount = 0; 
@@ -377,7 +376,7 @@ static void *SchedularFunc(ALLEGRO_THREAD *thr, void *arg){
             al_unlock_mutex(data->mutex); 
         }
 
-        al_rest(WAIT_FACTOR);
+        // al_rest(WAIT_FACTOR);
     }
 
     return NULL;
