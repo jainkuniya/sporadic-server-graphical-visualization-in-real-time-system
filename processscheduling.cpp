@@ -7,8 +7,8 @@
 
 #define PI M_PI
 
-#define TOTAL_WIDTH 750
-#define TOTAL_HEIGHT 500
+#define TOTAL_WIDTH 1240
+#define TOTAL_HEIGHT 750
 #define TOTAL_TASKS 2
 
 using namespace std;
@@ -72,6 +72,10 @@ public :
     void drawProcessLine(float x1) {
         drawLine(x1, 330 , x1, 100, 5);
     }
+
+    void drawTimeLabelLine(float x1, float y){
+        drawLine(x1, y-10 , x1, y+10, 2);
+    }
 };
 
 int main() {
@@ -103,12 +107,20 @@ int main() {
     engine e;
     float x1 = 0,y1 = 220, x2 = 125, y2 = 300;
     float separationDis = 50;
+     
     for(float i = 0; i + 120 < 700; i += 2) {
         al_clear_to_color(al_map_rgb(255, 255, 255));
 
         // draw time line
         e.drawTimeLine(y2 + 20, 5);
         e.drawProcessLine(x1 + 60);
+
+        // draw time label
+        // 1 block i second
+        float tempX = x1 + 60;
+        for(int j=0; j<25; j++){
+            e.drawTimeLabelLine(tempX + j*40, y2 + 20);
+        }
 
         // draw each process line
         for(std::vector<int>::size_type processCount = 0; 
