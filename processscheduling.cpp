@@ -84,11 +84,11 @@ public :
     }
 
     void drawProcessLine(float x1) {
-        drawLine(x1, 330 , x1, 100, 5);
+        drawLine(x1, TOTAL_HEIGHT - 20 , x1, 100, 5);
     }
 
     void drawCurrentTimeLine(float x1){
-        al_draw_line(x1, 330, x1, 100, al_map_rgb(255, 0, 0), 3);
+        al_draw_line(x1, TOTAL_HEIGHT - 20, x1, 100, al_map_rgb(255, 0, 0), 3);
     }
 
     void drawTimeLabelLine(float x1, float y){
@@ -129,7 +129,7 @@ int main() {
     al_start_thread(thread_2);
 
     engine e;
-    float x1 = 0,y1 = 220, x2 = 125, y2 = 300;
+    float x1 = 0,y1 = 220, x2 = 125, y2 = TOTAL_HEIGHT - 50;
     float separationDis = 50;
      
     for(float i = 0; i + 120 < 1700; i += 2) {
