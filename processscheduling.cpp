@@ -1,5 +1,5 @@
 // g++ processscheduling.cpp -lallegro_primitives -lallegro
-
+#include <stdio.h>
 #include "allegro5/allegro.h"
 #include <allegro5/allegro_primitives.h>
 #include <cmath>
@@ -15,6 +15,15 @@
 #define MAX_TIME 25
 #define WAIT_FACTOR 0.025
 #define LOOP_TILL TOTAL_TIME/WAIT_FACTOR
+#define INITAL_WAIT 3
+
+#define CONTENT_START_X  60
+#define CONTENT_START_Y  220
+#define CONTENT_END_X  TOTAL_WIDTH-50
+#define CONTENT_END_Y  TOTAL_HEIGHT - 50
+#define processLineSeparationDis 100
+#define totalTimeLineLength CONTENT_END_X - CONTENT_START_X
+#define serverCapacityLabelDis TOTAL_HEIGHT/25
 
 using namespace std;
 
@@ -47,6 +56,17 @@ class AperiodicTask {
         }
 };
 
+class ServerCapacityCordinate {
+    public:
+        float x;
+        float y;
+    public:
+        ServerCapacityCordinate(float xCor, float yCor) {
+            x =xCor;
+            y=yCor;
+        }
+};
+
 class DATA{
 
    public:
@@ -59,8 +79,10 @@ class DATA{
       bool           ready;
       vector <PeriodicTask> threads;
       vector <AperiodicTask> aperiodicTask;
+      vector <ServerCapacityCordinate> serverCapacityCor;
       float          cs;
       float          ts;
+      float          currentCapacity;
 
    DATA() : mutex(al_create_mutex()),
             cond(al_create_cond()),
@@ -80,40 +102,45 @@ class DATA{
 
 class engine {
 public :
-    void drawLine(int x1,int y1, int x2, int y2, int t) {
-        al_draw_line(x1, y1, x2, y2, al_map_rgb(0, 0, 0), t);
+    void drawLine(int x11,int y11, int x22, int y22, int thickness) {
+        al_draw_line(x11, y11, x22, y22, al_map_rgb(0, 0, 0), thickness);
     }
 
-    void drawTimeLine(float y1, float thickness) {
-        drawLine(50, y1, TOTAL_WIDTH - 50, y1, thickness);
+    void drawSererGraphPoint(ServerCapacityCordinate cor){
+        al_draw_line(cor.x-2, cor.y-2, cor.x+2, cor.y+2, al_map_rgb(0, 0, 0), 2);
     }
 
-    void drawAperiodicTaskTimeLine(float y1){
-        al_draw_line(50, y1, TOTAL_WIDTH - 50, y1, al_map_rgb(0, 0, 255), 3);
+    void drawTimeLine(float y11, float thickness) {
+        drawLine(50, y11, TOTAL_WIDTH - 50, y11, thickness);
     }
 
-    void drawServerCapacityTimeLine(float y1){
-        al_draw_line(50, y1, TOTAL_WIDTH - 50, y1, al_map_rgb(0, 255, 0), 2);
+    void drawAperiodicTaskTimeLine(float y){
+        al_draw_line(50, y, TOTAL_WIDTH - 50, y, al_map_rgb(0, 0, 255), 3);
     }
 
-    void drawServerStatusLine(float y1){
-        al_draw_line(50, y1, TOTAL_WIDTH - 50, y1, al_map_rgb(132, 111, 60), 2);
+    void drawServerCapacityTimeLine(float y){
+        al_draw_line(50, y, TOTAL_WIDTH - 50, y, al_map_rgb(0, 255, 0), 2);
     }
 
-    void drawProcessLine(float x1) {
-        drawLine(x1, TOTAL_HEIGHT - 20 , x1, 100, 5);
+    void drawServerStatusLine(float y){
+        al_draw_line(50, y, TOTAL_WIDTH - 50, y, al_map_rgb(132, 111, 60), 2);
     }
 
-    void drawCurrentTimeLine(float x1){
-        al_draw_line(x1, TOTAL_HEIGHT - 20, x1, 100, al_map_rgb(255, 0, 0), 3);
+    void drawProcessLine(float x) {
+        drawLine(x, TOTAL_HEIGHT - 20 , x, 100, 5);
     }
 
-    void drawTimeLabelLine(float x1, float y){
-        drawLine(x1, y-10 , x1, y+10, 2);
+    void drawCurrentTimeLine(float x){
+        al_draw_line(x, TOTAL_HEIGHT - 20, x, 100, al_map_rgb(255, 0, 0), 3);
     }
 
-    void drawServerLabelLine(float y1){
-        drawLine(50, y1 , 70, y1, 2);
+    void drawTimeLabelLine(float x, float y){
+        // printf("%.6f %.6f\n", x, y);
+        drawLine(x, y-10 , x, y+10, 2);
+    }
+
+    void drawServerLabelLine(float y){
+        drawLine(50, y , 70, y, 2);
     }
 };
 
@@ -140,6 +167,7 @@ int main() {
     data.threads.push_back(threadData2);
     data.cs = 5;
     data.ts = 10;
+    data.currentCapacity = 5;
     AperiodicTask aperiodicTask1 = AperiodicTask(2, 4);
     AperiodicTask aperiodicTask2 = AperiodicTask(2, 8);
     data.aperiodicTask.push_back(aperiodicTask1);
@@ -150,52 +178,59 @@ int main() {
     al_start_thread(thread_2);
 
     engine e;
-    float x1 = 60,y1 = 220, x2 = TOTAL_WIDTH-50, y2 = TOTAL_HEIGHT - 50;
-    float separationDis = 100;
-    float totalTimeLine = x2-x1;
      
     for(float i = 0; i < LOOP_TILL; i += 1) {
         al_clear_to_color(al_map_rgb(255, 255, 255));
 
         // draw time line
-        e.drawTimeLine(y2 + 20, 5);
-        e.drawProcessLine(x1);
+        e.drawTimeLine(CONTENT_END_Y + 20, 5);
+        e.drawProcessLine(CONTENT_START_X);
 
         // draw time label
         // 1 block 1 second
         for(int j=0; j<MAX_TIME; j++){
-            e.drawTimeLabelLine(x1 + j*(totalTimeLine/MAX_TIME), y2 + 20);
+            //float xCor = CONTENT_START_X + j*(totalTimeLineLength/MAX_TIME);
+            float xCor = CONTENT_START_X + j*(float)((int)1130/(int)25);
+            float yCor = CONTENT_END_Y +20;
+            // printf("%.6f %.6f %.6f\n", xCor, yCor, (float)((int)1130/(int)25));
+            e.drawTimeLabelLine(xCor, yCor);
         }
 
         // draw each process line
         for(std::vector<int>::size_type processCount = 0; 
             processCount != data.threads.size(); 
             processCount++) {
-                e.drawTimeLine(y2 + 20 - (TOTAL_HEIGHT/2.5) - (processCount + 1 )*separationDis, 3);
+                e.drawTimeLine(CONTENT_END_Y + 20 - (TOTAL_HEIGHT/2.5) - (processCount + 1 )*processLineSeparationDis, 3);
         }
 
         // draw aperopic task line
-        e.drawAperiodicTaskTimeLine(y2 + 20 - (TOTAL_HEIGHT/2.5));
+        e.drawAperiodicTaskTimeLine(CONTENT_END_Y + 20 - (TOTAL_HEIGHT/2.5));
 
         // draw server status (active/idle) line
-        e.drawServerStatusLine(y2 + 20 - (TOTAL_HEIGHT/4.5));
+        e.drawServerStatusLine(CONTENT_END_Y + 20 - (TOTAL_HEIGHT/4.5));
 
         // draw aperopic task line
-        e.drawServerCapacityTimeLine(y2 + 20 - 3);
+        e.drawServerCapacityTimeLine(CONTENT_END_Y + 20 - 3);
+
+        // draw server capacity graph
+        for(std::vector<int>::size_type point = 0; 
+            point != data.serverCapacityCor.size(); 
+            point++) {
+                e.drawSererGraphPoint(data.serverCapacityCor[point]);
+        }
 
         // draw server capacity label
-        float tempY = y2 + 20;
         for(int j=0; j<5; j++){
-            e.drawServerLabelLine(tempY - (j)*30);
+            e.drawServerLabelLine(CONTENT_END_Y+20 - (j)*serverCapacityLabelDis);
         }
 
         // move current time line
-        e.drawCurrentTimeLine(x1 + i);
+        e.drawCurrentTimeLine(CONTENT_START_X + i);
 
         if(i==0){
             // wait before eyes are setup
             al_flip_display();
-            al_rest(3);
+            al_rest(INITAL_WAIT);
         }
         
         al_flip_display();
@@ -222,6 +257,20 @@ static void *Func_Thread(ALLEGRO_THREAD *thr, void *arg){
     al_broadcast_cond(data->cond);
 
     al_unlock_mutex(data->mutex);
+
+    for(float i = 0; i < LOOP_TILL; i += 1) {
+        if(i==0){
+            // wait before eyes are setup
+            al_rest(INITAL_WAIT);
+        }
+
+        al_lock_mutex(data->mutex);
+        data->serverCapacityCor.push_back(
+            ServerCapacityCordinate(CONTENT_START_X+i, CONTENT_END_Y+20 - data->currentCapacity * serverCapacityLabelDis));
+        al_unlock_mutex(data->mutex);
+
+        al_rest(WAIT_FACTOR);
+    }
 
 
 
