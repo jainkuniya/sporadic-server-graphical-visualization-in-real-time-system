@@ -1,7 +1,9 @@
-// g++ processscheduling.cpp -lallegro_primitives -lallegro
+// g++ processscheduling.cpp -lallegro_primitives -lallegro -lpthread -lallegro_font -lallegro_ttf
 #include <stdio.h>
 #include "allegro5/allegro.h"
 #include <allegro5/allegro_primitives.h>
+#include <allegro5/allegro_font.h>
+#include <allegro5/allegro_ttf.h>
 #include <cmath>
 #include <vector>
 #include <string>
@@ -20,7 +22,7 @@
 #define INITAL_WAIT 1
 
 #define CONTENT_START_X  60
-#define CONTENT_START_Y  220
+#define CONTENT_START_Y  50
 #define CONTENT_END_X  TOTAL_WIDTH-50
 #define CONTENT_END_Y  TOTAL_HEIGHT - 50
 #define processLineSeparationDis 100
@@ -208,10 +210,19 @@ int main() {
 	
     al_init();
     al_init_primitives_addon();
+    al_init_font_addon(); // initialize the font addon
+    al_init_ttf_addon();// initialize the ttf (True Type Font) addon
 
     display = al_create_display(TOTAL_WIDTH, TOTAL_HEIGHT);
     al_clear_to_color(al_map_rgb(255, 255, 255));
     if(!display) return -1;
+
+    ALLEGRO_FONT *font = al_load_ttf_font("arial_narrow_7.ttf",13,0 );
+
+   if (!font){
+      fprintf(stderr, "Could not load 'pirulen.ttf'.\n");
+      return -1;
+   }
 
     al_clear_to_color(al_map_rgb(255, 255, 255));
 
@@ -223,8 +234,8 @@ int main() {
     ALLEGRO_THREAD      *therad_6    = NULL; // thread to schedule
 
     DATA data;
-    PeriodicTask threadData2 = PeriodicTask("Periodic Task 1", 1, 5, 0, 5, 1);
-    PeriodicTask threadData1 = PeriodicTask("Periodic Task 2", 4, 15, 0, 15, 3);
+    PeriodicTask threadData2 = PeriodicTask("Per Task 1", 1, 5, 0, 5, 1);
+    PeriodicTask threadData1 = PeriodicTask("Per Task 2", 4, 15, 0, 15, 3);
     data.threads.push_back(threadData1);
     data.threads.push_back(threadData2);
     data.cs = 5;
@@ -254,6 +265,9 @@ int main() {
     for(float i = 0; i < LOOP_TILL; i += 1) {
         al_clear_to_color(al_map_rgb(255, 255, 255));
 
+        al_draw_text(font, al_map_rgb(0,0,0), TOTAL_WIDTH/2, CONTENT_START_Y ,ALLEGRO_ALIGN_CENTRE, "Q) Simulate and graphically visualize sporadic server scheduling algorithm for the given task set.");
+        al_draw_text(font, al_map_rgb(0,0,0), TOTAL_WIDTH/2, CONTENT_START_Y + 20 ,ALLEGRO_ALIGN_CENTRE, "P(C,T) => (1,5), (4,15); Cs=5, Ts=10;");
+
         // draw time line
         e.drawTimeLine(CONTENT_END_Y + 20, 5);
         e.drawProcessLine(CONTENT_START_X);
@@ -266,6 +280,10 @@ int main() {
             float yCor = CONTENT_END_Y +20;
             // printf("%.6f %.6f %.6f\n", xCor, yCor, (float)((int)1130/(int)25));
             e.drawTimeLabelLine(xCor, yCor);
+            char buffer [128];
+            int ret = snprintf(buffer, sizeof(buffer), "%d", j);
+            char * num_string = buffer; //String terminator is added by snprintf
+            al_draw_text(font, al_map_rgb(0,0,0), xCor, yCor + 10,ALLEGRO_ALIGN_CENTRE, num_string);
         }
         
         int serverStatusLineY = CONTENT_END_Y + 20 - (TOTAL_HEIGHT/4);
@@ -277,6 +295,7 @@ int main() {
             processCount++) {
                 float yCor = CONTENT_END_Y + 20 - (TOTAL_HEIGHT/2.5) - (processCount + 1 )*processLineSeparationDis;
                 e.drawTimeLine(yCor, 3);
+                al_draw_text(font, al_map_rgb(0,0,0), 25, yCor -40,ALLEGRO_ALIGN_CENTRE, processCount == 0 ? "P1" : "P0");
         
             // draw instance arrive ver lines
             for(std::vector<int>::size_type lineCount = 0; 
@@ -303,6 +322,8 @@ int main() {
         // draw aperopic task line
         float yCorServerLine = CONTENT_END_Y + 20 - (TOTAL_HEIGHT/2.5);
         e.drawAperiodicTaskTimeLine(yCorServerLine);
+        al_draw_text(font, al_map_rgb(0,0,0), 25, yCorServerLine -40,ALLEGRO_ALIGN_CENTRE, "Aperiodic");
+        al_draw_text(font, al_map_rgb(0,0,0), 25, yCorServerLine -20,ALLEGRO_ALIGN_CENTRE, "requests");
         // draw instance arrive ver lines
         for(std::vector<int>::size_type lineCount = 0; 
             lineCount != data.sVerLines.size(); 
@@ -323,6 +344,7 @@ int main() {
 
         // draw server status (active/idle) line
         e.drawServerStatusLine(serverStatusLineY);
+        al_draw_text(font, al_map_rgb(0,0,0), 25, serverStatusLineY -20,ALLEGRO_ALIGN_CENTRE, "SS active");
 
         // draw aperopic task line
         e.drawServerCapacityTimeLine(CONTENT_END_Y + 20 - 3);
@@ -335,9 +357,14 @@ int main() {
         }
 
         // draw server capacity label
-        for(int j=0; j<5; j++){
+        for(int j=0; j<6; j++){
+            float serverCapLableYCor = CONTENT_END_Y + 20 - (j)*serverCapacityLabelDis;
             // cout << CONTENT_END_Y+20 - (j)*serverCapacityLabelDis << "\n";
-            e.drawServerLabelLine(CONTENT_END_Y - 10 - (j)*serverCapacityLabelDis);
+            e.drawServerLabelLine(serverCapLableYCor);
+            char buffer [128];
+            int ret = snprintf(buffer, sizeof(buffer), "%d", j);
+            char * num_string = buffer; //String terminator is added by snprintf
+            al_draw_text(font, al_map_rgb(0,0,0), 25, serverCapLableYCor - 5 ,ALLEGRO_ALIGN_CENTRE, num_string);
         }
 
         // move current time line
