@@ -317,39 +317,18 @@ static void *AperiodicTaskFunc(ALLEGRO_THREAD *thr, void *arg){
 
     DATA *data  = (DATA*) arg;
 
-    // get unaquired thread
-    // PeriodicTask threadData;
-    // bool foundTask = false;
-    // for(std::vector<int>::size_type processCount = 0; 
-    //         processCount != data->threads.size(); 
-    //         processCount++) {
-    //             if(!data->threads[processCount].isAquired){
-    //                 al_lock_mutex(data->mutex);
-    //                 data->threads[processCount].isAquired = true;
-    //                 al_unlock_mutex(data->mutex);
-    //                 threadData = data->threads[processCount];
-    //                 foundTask = true;
-    //                 break;
-    //             }
-    // }
+    for(float i = 0; i < LOOP_TILL; i += 1) {
+        if(i==0){
+            // wait before eyes are setup
+            al_rest(INITAL_WAIT);
+        }
 
-    // if(!foundTask) {
-    //     printf("No task found for this thread, returning\n");
-    //     return NULL;
-    // }
+        // al_lock_mutex(data->mutex);
+        printf("%.6f\n", i*WAIT_FACTOR);
+        // al_unlock_mutex(data->mutex);
 
-    // for(float i = 0; i < LOOP_TILL; i += 1) {
-    //     if(i==0){
-    //         // wait before eyes are setup
-    //         al_rest(INITAL_WAIT);
-    //     }
-
-    //     // al_lock_mutex(data->mutex);
-        
-    //     // al_unlock_mutex(data->mutex);
-
-    //     al_rest(WAIT_FACTOR);
-    // }
+        al_rest(WAIT_FACTOR);
+    }
 
    return NULL;
 }
