@@ -1,7 +1,7 @@
 // g++ processscheduling.cpp -lallegro_primitives -lallegro -lpthread -lallegro_font -lallegro_ttf
 // ./a.out
 
-// This code is written from scratch, complete commit history can be observer at
+// This code is written from scratch, complete commit history can be observed at
 // https://github.com/jainkuniya/sporadic-server-graphical-visualization-in-real-time-system/commits
 
 // youtube video: https://www.youtube.com/watch?v=Uk_JrIUiWAw

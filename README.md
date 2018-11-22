@@ -30,7 +30,7 @@ g++ processscheduling.cpp -lallegro_primitives -lallegro -lpthread -lallegro_fon
 
 [![Looks like this](http://img.youtube.com/vi/Uk_JrIUiWAw/0.jpg)](https://www.youtube.com/watch?v=Uk_JrIUiWAw "Sporadic Server | Simulation | Real Time Systems | Allegro | Thread | Mutex")
 
-PS: This code is written from scratch, complete commit history can be observer on [Github](./commits)
+PS: This code is written from scratch, complete commit history can be observer on [Github](https://github.com/jainkuniya/sporadic-server-graphical-visualization-in-real-time-system/commits)
 
 PS: Do not copy code :).
 
