@@ -15,7 +15,7 @@
 #define MAX_TIME 25
 #define WAIT_FACTOR 0.025
 #define LOOP_TILL TOTAL_TIME/WAIT_FACTOR
-#define INITAL_WAIT 3
+#define INITAL_WAIT 2
 
 #define CONTENT_START_X  60
 #define CONTENT_START_Y  220
@@ -302,6 +302,13 @@ static void *ServerCapacityFunc(ALLEGRO_THREAD *thr, void *arg){
 static void *SchedularFunc(ALLEGRO_THREAD *thr, void *arg){
 
     DATA *data  = (DATA*) arg;
+
+    for(float i = 0; i < LOOP_TILL; i += 1) {
+        if(i==0){
+            // wait before eyes are setup
+            al_rest(INITAL_WAIT);
+        }
+    }
 
     return NULL;
 }
