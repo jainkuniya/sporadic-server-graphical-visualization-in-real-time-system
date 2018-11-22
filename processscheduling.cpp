@@ -354,6 +354,30 @@ static void *SchedularFunc(ALLEGRO_THREAD *thr, void *arg){
             // wait before eyes are setup
             al_rest(INITAL_WAIT);
         }
+
+        int newPrio = 99;
+        for(std::vector<int>::size_type taskCount = 0; 
+                taskCount != data->threads.size(); 
+                taskCount++) {
+
+                    if(data->threads[taskCount].pr < newPrio && data->threads[taskCount].wantCPU) {
+                        newPrio = data->threads[taskCount].pr;
+                    }
+        }
+
+        if(data->ps < newPrio && data->serverWantCPU){
+            newPrio = data->ps;
+        }
+
+        // check if priority changed
+        if(newPrio != data->currentExc) {
+            cout << "Giving priority to: " << newPrio << "\n";
+            al_lock_mutex(data->mutex);
+            data->currentExc = newPrio;
+            al_unlock_mutex(data->mutex); 
+        }
+
+        al_rest(WAIT_FACTOR);
     }
 
     return NULL;
