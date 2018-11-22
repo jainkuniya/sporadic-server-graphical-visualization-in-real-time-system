@@ -42,6 +42,8 @@ class DATA{
       bool           modi_X;
       bool           ready;
       vector <ThreadData> threads;
+      float          cs;
+      float          ts;
 
    DATA() : mutex(al_create_mutex()),
             cond(al_create_cond()),
@@ -103,6 +105,8 @@ int main() {
     ThreadData threadData2 = ThreadData(2, 10, 0, 20);
     data.threads.push_back(threadData1);
     data.threads.push_back(threadData2);
+    data.cs = 5;
+    data.ts = 10;
     thread_1 = al_create_thread(Func_Thread, &data);
     thread_2 = al_create_thread(Func_Thread, &data);
     al_start_thread(thread_1);
